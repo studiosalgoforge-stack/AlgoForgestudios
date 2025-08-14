@@ -1,7 +1,7 @@
 ---
 title: "How to Build Your First Machine Learning Model Using Scikit-Learn"
 description: "A beginner-friendly step-by-step tutorial to create your first ML model in Python using the Scikit-learn library."
-author: "Kapish"
+author: "Kapish Verma"
 date: "2025-01-26"
 tags: ["machine-learning", "python", "scikit-learn", "data-science", "tutorial"]
 category: "Machine Learning"
@@ -135,5 +135,6 @@ This is an extremely capable foundation. Now, you can explore many different ML 
 If this felt overwhelming at times — that’s okay! Machine Learning is vast, but the best way to learn is by **doing, experimenting, and building projects**.
 
 The Python and Scikit-learn communities are incredibly supportive, with countless resources to help you along the way.
+
 
 Machine learning is shaping the future — and now you’ve taken your **first step** in being a part of that change.
