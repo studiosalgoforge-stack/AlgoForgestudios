@@ -1,7 +1,7 @@
 ---
 title: "Understanding Confusion Matrix: Why Accuracy Isn't Everything in Machine Learning"
 description: "Learn why accuracy alone can be misleading and how confusion matrices provide a complete picture of your classification model's performance"
-author: "Kapish"
+author: "Kapish Verma"
 date: "2025-01-26"
 tags: ["machine-learning", "data-science", "model-evaluation", "confusion-matrix", "python"]
 category: "Data Science"
@@ -134,5 +134,6 @@ Using only accuracy in these cases is like *judging a book by its cover*—you m
 ## Conclusion
 
 A confusion matrix is **more than just a table**—it’s a diagnostic tool. It tells the story behind your model’s behavior, helping you go beyond surface-level evaluation.
+
 
 If you've been relying solely on accuracy, it's time to **rethink** your approach. Understanding and using a confusion matrix will make your models more **robust, fair, and reliable**.
