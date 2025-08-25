@@ -1,5 +1,3 @@
-// src/app/super-admin/blogs/[slug]/edit/page.tsx
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -35,12 +33,10 @@ export default function EditBlogPage() {
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
-
     useEffect(() => {
         if (slug) {
             const fetchPost = async () => {
                 setIsLoading(true);
-
                 try {
                     const res = await axios.get(`${apiUrl}/api/super-admin/blogs/${slug}`);
                     if (res.data.success) {
@@ -57,7 +53,6 @@ export default function EditBlogPage() {
                     } else {
                         setError("Failed to load blog post data.");
                     }
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch (err) {
                     setError("Could not connect to the server.");
                 } finally {
@@ -73,13 +68,12 @@ export default function EditBlogPage() {
         setIsSaving(true);
         setError('');
 
-
         try {
             const res = await axios.put(`${apiUrl}/api/super-admin/blogs/${slug}`, {
                 title,
                 author,
                 content,
-                featuredImage,
+                image: featuredImage, // **CORRECTED: Use 'image' to match the backend**
                 category,
                 description,
                 tags: tags.split(',').map(tag => tag.trim()),
@@ -92,7 +86,6 @@ export default function EditBlogPage() {
             } else {
                 setError(res.data.message || "An error occurred while saving.");
             }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             setError("Failed to connect to the server.");
         } finally {
@@ -102,7 +95,7 @@ export default function EditBlogPage() {
 
     return (
         <div className="min-h-screen bg-black text-white p-4 sm:p-8">
-             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                     <div className="flex items-center mb-6">
                         <Button variant="outline" asChild>
@@ -114,9 +107,9 @@ export default function EditBlogPage() {
                         <h1 className="text-2xl font-bold ml-4">Edit Blog Post</h1>
                     </div>
                     {isLoading ? (
-                         <div className="flex justify-center items-center h-64">
+                        <div className="flex justify-center items-center h-64">
                             <Loader2 className="h-12 w-12 animate-spin text-cyan-400" />
-                         </div>
+                        </div>
                     ) : error ? (
                         <p className="text-red-400 text-center">{error}</p>
                     ) : (
@@ -157,7 +150,7 @@ export default function EditBlogPage() {
                         </form>
                     )}
                 </motion.div>
-             </div>
+            </div>
         </div>
     );
 }
