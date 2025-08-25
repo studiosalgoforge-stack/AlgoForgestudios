@@ -1,4 +1,4 @@
-import { dbConnect } from '@/lib/db';
+import dbConnect  from '@/lib/db';
 import User from '@/models/User';
 
 const seedUsers = async () => {
@@ -7,7 +7,7 @@ const seedUsers = async () => {
     console.log('Connected to database');
 
     // Clear existing users
-    await User.deleteMany({});
+    // await User.deleteMany({});
     console.log('Cleared existing users');
 
     // Seed admin user

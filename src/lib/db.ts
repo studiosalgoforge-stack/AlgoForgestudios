@@ -1,16 +1,55 @@
-import mongoose from 'mongoose';
+import mongoose, { Mongoose } from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI!;
-if (!MONGODB_URI) throw new Error('Define MONGODB_URI in .env.local');
+const MONGODB_URI = process.env.MONGODB_URI;
 
-let cached: { conn: typeof mongoose | null } = (global as any)._mongoose;
+// We'll keep the initial check as a safeguard for immediate feedback
+if (!MONGODB_URI) {
+  throw new Error(
+    'Please define the MONGODB_URI environment variable inside .env.local'
+  );
+}
+
+declare global {
+  var mongoose: {
+    conn: Mongoose | null;
+    promise: Promise<Mongoose> | null;
+  };
+}
+
+let cached = global.mongoose;
 
 if (!cached) {
-  (global as any)._mongoose = cached = { conn: null };
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
-export async function dbConnect() {
-  if (cached.conn) return cached.conn;
-  cached.conn = await mongoose.connect(MONGODB_URI);
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    // Add the check inside the function to satisfy TypeScript
+    if (!MONGODB_URI) {
+      throw new Error('MONGODB_URI is not defined');
+    }
+
+    const opts = {
+      bufferCommands: false,
+    };
+
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      return mongoose;
+    });
+  }
+  
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
   return cached.conn;
 }
+
+export default connectDB;

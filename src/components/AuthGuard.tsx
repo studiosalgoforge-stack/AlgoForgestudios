@@ -1,93 +1,75 @@
-"use client"
+// src/components/AuthGuard.tsx
+"use client";
 
-import { useEffect, ReactNode, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
-import { motion } from 'framer-motion'
+import { useEffect, ReactNode } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext'; // <-- FIX: Import the correct, unified hook
+import { motion } from 'framer-motion';
 
 interface AuthGuardProps {
-  children: ReactNode
-  requiredRole?: 'student' | 'admin'
-  redirectTo?: string
-  allowUnauthenticated?: boolean // For pages like login/signup that should redirect if authenticated
+  children: ReactNode;
+  requiredRole?: 'student' | 'admin' | 'super-admin';
+  allowUnauthenticated?: boolean;
 }
 
 export function AuthGuard({
-  children, 
-  requiredRole, 
-  redirectTo = '/login',
+  children,
+  requiredRole,
   allowUnauthenticated = false
 }: AuthGuardProps) {
-  const { isAuthenticated, user, isLoading } = useAuth()
-  const router = useRouter()
-  const [shouldRender, setShouldRender] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
+  // --- THIS IS THE FIX ---
+  // We now use the main useAuth hook which gives us reliable state
+  const { isAuthenticated, user, admin, superAdmin, isLoading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Handle mounting to prevent hydration issues
+  const currentUser = user || admin || superAdmin;
+  const userRole = currentUser?.role;
+  // --- END OF FIX ---
+
   useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  useEffect(() => {
-    // Wait for component to mount and auth to initialize
-    if (!isMounted || isLoading) {
-      return
+    if (isLoading) {
+      return; // Wait for the session to be verified
     }
 
-    // Handle pages that should redirect authenticated users (like login/signup)
-    if (allowUnauthenticated && isAuthenticated && user) {
-      if (user.role === 'admin') {
-        router.push('/admin')
-      } else {
-        router.push('/')
+    // For pages like Login/Signup that allow unauthenticated access
+    if (allowUnauthenticated) {
+      if (isAuthenticated) {
+        // If logged in, redirect away from login/signup to the appropriate dashboard
+        const redirectPath = userRole === 'super-admin' ? '/super-admin' : userRole === 'admin' ? '/admin' : '/dashboard';
+        router.push(redirectPath);
       }
-      return
+      return; // Otherwise, allow access
     }
 
-    // Handle protected routes
-    if (!allowUnauthenticated) {
-      if (!isAuthenticated) {
-        router.push(redirectTo)
-        return
-      }
-
-      if (requiredRole && user?.role !== requiredRole) {
-        // Redirect based on user's actual role
-        if (user?.role === 'admin') {
-          router.push('/admin')
-        } else {
-          router.push('/dashboard')
-        }
-        return
-      }
+    // For protected pages
+    if (!isAuthenticated) {
+      router.push('/login'); // Not logged in, redirect to login
+      return;
+    }
+    
+    // If a specific role is required and the user's role doesn't match, redirect
+    if (requiredRole && userRole !== requiredRole) {
+      router.push('/dashboard'); // Redirect to a default safe page
     }
 
-    setShouldRender(true)
-  }, [isAuthenticated, user, requiredRole, redirectTo, router, allowUnauthenticated, isLoading, isMounted])
+  }, [isLoading, isAuthenticated, userRole, router, pathname, requiredRole, allowUnauthenticated]);
 
-  // Show loading spinner while mounting, auth is initializing, or redirecting
-  if (!isMounted || isLoading || !shouldRender) {
+  // While loading or if redirection is happening, show a loading spinner
+  if (isLoading || (allowUnauthenticated && isAuthenticated) || (!allowUnauthenticated && (!isAuthenticated || (requiredRole && userRole !== requiredRole)))) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
         <motion.div
-          className="flex flex-col items-center space-y-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <motion.div
-            className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-          <p className="text-gray-400 text-sm">Loading...</p>
-        </motion.div>
+          className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        />
       </div>
-    )
+    );
   }
 
-  return <>{children}</>
+  // If all checks pass, render the component
+  return <>{children}</>;
 }
 
-// Default export for convenience
-export default AuthGuard
+export default AuthGuard;

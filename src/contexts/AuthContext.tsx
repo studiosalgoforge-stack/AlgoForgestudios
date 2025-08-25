@@ -1,165 +1,129 @@
+// src/contexts/AuthContext.tsx
 "use client";
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode, useState } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import axios from 'axios';
-import { AuthState, AuthContextType, LoginCredentials, User } from '@/types/auth';
+import { useRouter } from 'next/navigation';
+import { AuthState, AuthContextType, LoginCredentials } from '@/types/auth';
 
-// Auth actions
-type AuthAction = 
+type UserPayload = { id: string; role: string; name: string; email?: string; username?: string; };
+
+type AuthAction =
+  | { type: 'INITIALIZE'; payload?: UserPayload }
   | { type: 'LOGIN_START' }
-  | { type: 'LOGIN_SUCCESS'; payload: User }
+  | { type: 'LOGIN_SUCCESS'; payload: UserPayload }
   | { type: 'LOGIN_FAILURE'; payload: string }
-  | { type: 'LOGOUT' }
-  | { type: 'CLEAR_ERROR' }
-  | { type: 'RESTORE_SESSION'; payload: User };
+  | { type: 'LOGOUT' };
 
-// Initial state
 const initialState: AuthState = {
   user: null,
+  admin: null,
+  superAdmin: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true,
   error: null,
 };
 
-// Reducer
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
-    case 'LOGIN_START':
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
+    case 'INITIALIZE':
     case 'LOGIN_SUCCESS':
+      const userPayload = action.payload || null;
       return {
         ...state,
-        user: action.payload,
-        isAuthenticated: true,
+        user: userPayload?.role === 'student' ? userPayload : null,
+        admin: userPayload?.role === 'admin' ? userPayload : null,
+        superAdmin: userPayload?.role === 'super-admin' ? userPayload : null,
+        isAuthenticated: !!userPayload,
         isLoading: false,
         error: null,
       };
+    case 'LOGIN_START':
+      return { ...state, isLoading: true, error: null };
     case 'LOGIN_FAILURE':
-      return {
-        ...state,
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: action.payload,
-      };
+      return { ...initialState, isLoading: false, error: action.payload };
     case 'LOGOUT':
-      return {
-        ...state,
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: null,
-      };
-    case 'CLEAR_ERROR':
-      return {
-        ...state,
-        error: null,
-      };
-    case 'RESTORE_SESSION':
-      return {
-        ...state,
-        user: action.payload,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      };
+      return { ...initialState, isLoading: false };
     default:
       return state;
   }
 }
 
-// Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Provider component
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
 
-  // Handle mounting to prevent hydration issues
   useEffect(() => {
-    setIsMounted(true);
+    const checkUserSession = async () => {
+      try {
+        const { data } = await axios.get('/api/auth/me');
+        if (data.success) {
+          dispatch({ type: 'INITIALIZE', payload: data.user });
+        } else {
+          dispatch({ type: 'INITIALIZE' });
+        }
+      } catch (error) {
+        dispatch({ type: 'INITIALIZE' });
+      }
+    };
+    checkUserSession();
   }, []);
 
-  // Restore session on app load - only on client side
-  useEffect(() => {
-    if (!isMounted) return;
-    
-    try {
-      const token = localStorage.getItem('authToken');
-      const userData = localStorage.getItem('userData');
-      
-      if (token && userData) {
-        const user: User = JSON.parse(userData);
-        dispatch({ type: 'RESTORE_SESSION', payload: user });
-      }
-    } catch (error) {
-      // Clean up invalid data
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
-    } finally {
-      setIsInitialized(true);
-    }
-  }, [isMounted]);
-
-  // Login function
-  const login = async (credentials: LoginCredentials) => {
+const login = async (credentials: LoginCredentials) => {
     dispatch({ type: 'LOGIN_START' });
-    
     try {
-      const response = await axios.post('/api/auth', credentials);
+      // FIX: Change '/api/login' to '/api/auth'
+      const { data } = await axios.post('/api/auth', credentials); 
       
-      if (response.data.success) {
-        const { user, token } = response.data;
-        
-        // Store in localStorage (client-side only)
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('authToken', token);
-          localStorage.setItem('userData', JSON.stringify(user));
-        }
-        
-        dispatch({ type: 'LOGIN_SUCCESS', payload: user });
+      dispatch({ type: 'LOGIN_SUCCESS', payload: data.user });
+      
+      // This logic will now work correctly
+      if (data.user.role === 'admin') {
+        router.push('/admin');
       } else {
-        // Handle case where API returns success: false
-        const errorMessage = response.data.message || 'Login failed';
-        dispatch({ type: 'LOGIN_FAILURE', payload: errorMessage });
-        throw new Error(errorMessage);
+        router.push('/dashboard');
       }
     } catch (error: any) {
-      // Handle HTTP errors (4xx, 5xx) and other errors
-      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
-      dispatch({ type: 'LOGIN_FAILURE', payload: errorMessage });
-      throw new Error(errorMessage);
+      const message = error.response?.data?.message || "Login failed";
+      dispatch({ type: 'LOGIN_FAILURE', payload: message });
+      throw new Error(message);
     }
   };
 
-  // Logout function
-  const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
-      localStorage.removeItem('adminAuth'); // Remove legacy admin auth
+  // --- THIS FUNCTION WAS MISSING FROM THE CONTEXT VALUE ---
+  const superAdminLogin = async (credentials: Omit<LoginCredentials, 'username' | 'role'>) => {
+    dispatch({ type: 'LOGIN_START' });
+    try {
+      const { data } = await axios.post('/api/super-admin/login', credentials);
+      dispatch({ type: 'LOGIN_SUCCESS', payload: data.user });
+      router.push('/super-admin');
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Super Admin login failed";
+      dispatch({ type: 'LOGIN_FAILURE', payload: message });
+      throw new Error(message);
     }
-    dispatch({ type: 'LOGOUT' });
   };
 
-  // Clear error function
-  const clearError = () => {
-    dispatch({ type: 'CLEAR_ERROR' });
+  const logout = async () => {
+    try {
+      await axios.post('/api/auth/logout');
+    } catch (error) {
+      console.error("Logout API call failed, but clearing client state regardless.", error);
+    } finally {
+      dispatch({ type: 'LOGOUT' });
+      router.push('/');
+    }
   };
-
+  
+  // --- THE FIX: ADD superAdminLogin TO THIS OBJECT ---
   const contextValue: AuthContextType = {
     ...state,
-    // Override isLoading to include initialization state
-    isLoading: state.isLoading || !isInitialized,
     login,
+    superAdminLogin, // Added the missing function
     logout,
-    clearError,
+    // Add any other required functions like 'signup' or 'adminLogin' if your type requires them
   };
 
   return (
@@ -169,11 +133,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Hook to use auth context
-export function useAuth(): AuthContextType {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};
