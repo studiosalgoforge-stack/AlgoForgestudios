@@ -15,8 +15,8 @@ interface BlogProps {
 }
 
 export default async function BlogPostPage({ params }: BlogProps) {
-  // Fetch blog post
-  const post = getBlogPost((await params).slug);
+  // CORRECTED: Await the database call and use params directly.
+  const post = await getBlogPost(params.slug);
 
   if (!post) {
     notFound();
