@@ -6,6 +6,7 @@ import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/contexts/AuthContext";
+import Chatbot from "@/components/Chatbot";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -18,6 +19,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <main className={isHiddenRoute ? '' : 'pt-12'}>{children}</main>
       {!isHiddenRoute && <Footer />}
       <Toaster />
+      <Chatbot />
     </AuthProvider>
   );
 }
