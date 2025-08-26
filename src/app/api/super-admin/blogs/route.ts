@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         tags: Array.isArray(tags) ? tags : [],
         readTime: readTime || '5', // Assuming a default read time
         featured: featured || false,
-        image: image || '/images/blog/default-blog.png',
+        image: image || '',
     });
 
     await newPost.save();

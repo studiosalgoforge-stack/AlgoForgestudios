@@ -256,7 +256,7 @@ export function Navigation() {
         const response = await axios.get("/api/courses");
         const fetchedCourses: Course[] = response.data.courses;
 
-        console.log("Fetched courses:", fetchedCourses);
+        // console.log("Fetched courses:", fetchedCourses);
 
         if (!fetchedCourses || !Array.isArray(fetchedCourses)) {
           console.error("Invalid courses data structure");
@@ -267,14 +267,14 @@ export function Navigation() {
           (course) => course.featured === true || course.trending === true
         );
 
-        console.log("Featured or trending courses found:", featuredOrTrendingCourses.length);
-        console.log("Courses by category:", featuredOrTrendingCourses.map(c => ({ title: c.title, category: c.courseCategory, featured: c.featured, trending: c.trending })));
+        // console.log("Featured or trending courses found:", featuredOrTrendingCourses.length);
+        // console.log("Courses by category:", featuredOrTrendingCourses.map(c => ({ title: c.title, category: c.courseCategory, featured: c.featured, trending: c.trending })));
 
         const categorizedCourses = featuredOrTrendingCourses.reduce(
           (acc, course) => {
             const category = course.courseCategory?.trim();
             if (!category) {
-              console.warn("Course missing courseCategory:", course.title);
+              // console.warn("Course missing courseCategory:", course.title);
               return acc;
             }
 
@@ -284,7 +284,7 @@ export function Navigation() {
 
             const courseId = course._id || course.id;
             if (!courseId) {
-              console.warn("Course missing ID:", course.title);
+              // console.warn("Course missing ID:", course.title);
               return acc;
             }
 
@@ -306,7 +306,7 @@ export function Navigation() {
           items,
         }));
 
-        console.log("Final categorized courses:", courseData);
+        // console.log("Final categorized courses:", courseData);
         setCourses(courseData);
         setAllCourses(fetchedCourses);
       } catch (error) {

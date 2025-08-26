@@ -65,7 +65,7 @@ export function Footer() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <MapPin className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-                <span>Uttar Pradesh, India</span>
+                <span>3511 Thomas Rd 5, Santa Clara, CA 95054, United States</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <Phone className="w-4 h-4 text-purple-400 flex-shrink-0" />

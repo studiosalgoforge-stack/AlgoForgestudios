@@ -25,7 +25,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className="dark bg-gradient-to-br from-black via-gray-900 to-black overflow-x-hidden text-white min-h-screen">
         {/* Add the Google Analytics Scripts here */}
         <Script

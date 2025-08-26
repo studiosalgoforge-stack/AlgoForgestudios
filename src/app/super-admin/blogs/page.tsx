@@ -149,7 +149,7 @@ export default function BlogManagementPage() {
                                             <CardHeader className="p-4">
                                                 <div className="aspect-video bg-gray-900 rounded-md mb-4 flex items-center justify-center overflow-hidden">
                                                     <img
-                                                        src={post.image || "public/images/no-image-icon-23485.png"}
+                                                        src={post.image || ""}
                                                         alt={post.title}
                                                         className="w-full h-full object-cover"
                                                         onError={(e) => { e.currentTarget.src = "public/images/no-image-icon-23485.png"; }}
