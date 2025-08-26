@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-// src/app/super-admin/blogs/page.tsx
+// src/app/super-admin/blogs/page.tsx 
 
 "use client";
 
