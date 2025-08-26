@@ -1,4 +1,4 @@
-// src/app/layout.tsx
+// src/app/layout.tsx.
 import "./globals.css";
 import { isMaintenanceMode } from "@/lib/maintenance";
 import { headers } from 'next/headers';
@@ -45,4 +45,6 @@ export default async function RootLayout({
       </body>
     </html>
   );
+
 }
+

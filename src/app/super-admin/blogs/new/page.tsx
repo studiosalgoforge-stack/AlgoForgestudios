@@ -1,5 +1,4 @@
-// src/app/super-admin/blogs/new/page.tsx
-
+ // src/app/super-admin/blogs/new/page.tsx
 "use client";
 
 import { useState } from 'react';
