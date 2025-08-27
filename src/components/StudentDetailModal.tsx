@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, Phone, X, User, Edit, Save, XCircle, BookOpen, BarChart2, CheckCircle, Clock } from "lucide-react";
 import axios from 'axios';
 import toast from 'react-hot-toast';
-
+  
 // Define the structure of a student
 interface Student {
   phone?: string;
