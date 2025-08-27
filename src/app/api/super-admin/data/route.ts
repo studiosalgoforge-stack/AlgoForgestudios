@@ -20,6 +20,8 @@ const transformLeadData = (lead: any) => ({
   notes: lead.notes || '',
   status: lead.status || 'New',
   date: lead.createdAt.toISOString(),
+  interests: lead.interests || [],
+  availability: lead.availability || '',
 });
 
 const transformStudentData = (student: any) => ({

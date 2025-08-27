@@ -9,7 +9,8 @@ import axios from 'axios';
 import {
     Users, Calendar, Play, TrendingUp, BookOpen, Briefcase, FileText, Search, Plus, Brain, Download, Activity, LogOut, Eye, Trash2, MoreVertical, ArrowLeft,
     MoveRightIcon,
-    Edit, // <-- Import Edit icon
+    Edit,
+    View, // <-- Import Edit icon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,6 +58,7 @@ interface Instructor {
 }
 
 interface Student {
+    phone?: string;
     _id: string;
     name: string;
     email: string;
@@ -106,9 +108,10 @@ const iconMap: { [key: string]: React.ElementType } = {
 // --- HELPER FUNCTIONS ---
 const getTypeColor = (type: string) => {
     switch (type) {
-        case 'Schedule Call': return "border-cyan-700 text-cyan-300";
-        case 'Join Projects': return "border-purple-700 text-purple-300";
-        case 'Course Recommendation': return "border-blue-700 text-blue-300";
+        case 'ScheduleCall': return "border-cyan-700 text-cyan-300";
+        case 'JoinProjects': return "border-purple-700 text-purple-300";
+        case 'Recommendation': return "border-blue-700 text-blue-300";
+        case 'EnterpriseSolutions': return "border-red-700 text-red-300";
         default: return "border-slate-700 text-slate-300";
     }
 };
@@ -119,6 +122,19 @@ const getStatusColor = (status: string) => {
         case 'Completed': return "bg-blue-900/40 border-blue-700/50 text-blue-400";
         case 'Published': return "bg-green-900/40 border-green-700/50 text-green-400";
         default: return "bg-slate-800 border-slate-700 text-slate-300";
+    }
+};
+
+const getExperienceColor = (experience: string) => {
+    switch (experience.toLowerCase()) {
+        case 'beginner':
+            return 'border-green-700 text-green-300';
+        case 'intermediate':
+            return 'border-yellow-700 text-yellow-300';
+        case 'advanced':
+            return 'border-red-700 text-red-300';
+        default:
+            return 'border-slate-700 text-slate-300';
     }
 };
 
@@ -321,7 +337,7 @@ export default function SuperAdminDashboard() {
             case 'students':
                 const student = item as Student;
                 return (
-                    <TableRow key={student._id} className="border-b-slate-800 hover:bg-slate-800/30">
+                    <TableRow key={student._id} className="border-b-slate-800 text-lg hover:bg-slate-800/30">
                         <TableCell className="font-medium text-slate-50">{student.name}</TableCell>
                         <TableCell className="text-slate-400">{student.email}</TableCell>
                         <TableCell className="text-slate-400">{student.course || 'N/A'}</TableCell>
@@ -340,7 +356,7 @@ export default function SuperAdminDashboard() {
             case 'instructors':
                 const instructor = item as Instructor;
                 return (
-                    <TableRow key={instructor._id} className="border-b-slate-800 hover:bg-slate-800/30">
+                    <TableRow key={instructor._id} className="border-b-slate-800 text-lg hover:bg-slate-800/30">
                         <TableCell className="font-medium text-slate-50">{instructor.name}</TableCell>
                         <TableCell className="text-slate-400">{instructor.email}</TableCell>
                         <TableCell className="text-slate-400">{instructor.courses || '0'}</TableCell>
@@ -358,20 +374,20 @@ export default function SuperAdminDashboard() {
             case 'courses':
                 const course = item as Course;
                 return (
-                    <TableRow key={course._id} className="border-b-slate-800 hover:bg-slate-800/30">
-                        <TableCell className="font-medium text-base text-slate-50">{course.title}</TableCell>
-                        <TableCell className="text-base text-slate-400">{course.instructor || 'N/A'}</TableCell>
-                        <TableCell className="text-base text-slate-400">{course.students || '0'}</TableCell>
+                    <TableRow key={course._id} className="border-b-slate-800 text-lg hover:bg-slate-800/30">
+                        <TableCell className="font-medium text-slate-50">{course.title}</TableCell>
+                        <TableCell className="text-slate-400">{course.instructor || 'N/A'}</TableCell>
+                        <TableCell className="text-slate-400">{course.students || '0'}</TableCell>
                         <TableCell><Badge className={getStatusColor(course.status)}>{course.status}</Badge></TableCell>
-                        <TableCell className="text-base text-slate-400"><ClientOnlyDate dateString={course.createdAt} /></TableCell>
-                        <TableCell className="text-right">{/* Actions */}</TableCell>
+                        <TableCell className="text-slate-400"><ClientOnlyDate dateString={course.createdAt} /></TableCell>
+                        <TableCell className="text-right"><Button variant="outline" size="sm"><Eye className="w-4 h-4 mr-2" />View</Button></TableCell>
                     </TableRow>
                 );
             // --- UPDATED BLOGS CASE ---
             case 'blogs':
                 const blog = item as Blog;
                 return (
-                    <TableRow key={blog.slug} className="border-b-slate-800 hover:bg-slate-800/30">
+                    <TableRow key={blog.slug} className="border-b-slate-800  hover:bg-slate-800/30">
                         <TableCell className="font-medium text-base text-slate-50">{blog.title}</TableCell>
                         <TableCell className="text-base text-slate-400">{blog.author}</TableCell>
                         <TableCell className="text-base text-slate-400">{blog.category}</TableCell>
@@ -391,14 +407,14 @@ export default function SuperAdminDashboard() {
             default:
                 const lead = item as Lead;
                 return (
-                    <TableRow key={lead._id} className="border-b-slate-800 hover:bg-slate-800/30">
+                    <TableRow key={lead._id} className="border-b-slate-800 text-lg hover:bg-slate-800/30">
                         <TableCell className="font-medium text-slate-50">{lead.name}</TableCell>
                         <TableCell className="text-slate-400">
                             <div>{lead.email}</div>
                             <div>{lead.phone}</div>
                         </TableCell>
                         <TableCell><Badge variant="outline" className={getTypeColor(lead.type)}>{lead.type}</Badge></TableCell>
-                        <TableCell className="text-slate-400">{lead.experience}</TableCell>
+                        <TableCell><Badge variant="outline" className={getExperienceColor(lead.experience)}>{lead.experience}</Badge></TableCell>
                         <TableCell className="text-slate-400"><ClientOnlyDate dateString={lead.date} /></TableCell>
                         <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
@@ -465,7 +481,7 @@ export default function SuperAdminDashboard() {
                                 {renderAddButton()}
                             </div>
                         </div>
-                        {currentView ? (<div className="bg-black/50 backdrop-blur-lg border border-gray-700/50 rounded-lg overflow-hidden px-6"><div className="p-4 border-b border-slate-700/50 -mx-6 px-6"><h2 className="text-xl font-semibold text-white">{currentView.title} Table</h2></div><Table><TableHeader><TableRow className="border-b-slate-700/50 hover:bg-transparent">{currentView.columns.map((col: string) => <TableHead key={col} className={`text-lg ${col === 'Actions' ? 'text-right' : ''}`}>{col}</TableHead>)}</TableRow></TableHeader><TableBody>{currentView.data && currentView.data.length > 0 ? currentView.data.map(renderTableRow) : renderTableRow(null, 0)}</TableBody></Table></div>) : (<div className="bg-black/50 backdrop-blur-lg border border-gray-700/50 rounded-lg overflow-hidden p-10 text-center text-slate-400">Select a category to view data.</div>)}
+                        {currentView ? (<div className="bg-black/50 backdrop-blur-lg border border-gray-700/50 rounded-lg overflow-hidden px-6"><div className="p-4 border-b border-slate-700/50 -mx-6 px-6"><h2 className="text-3xl font-semibold text-white">{currentView.title} Table</h2></div><Table><TableHeader><TableRow className="border-b-slate-700/50 hover:bg-transparent">{currentView.columns.map((col: string) => <TableHead key={col} className={`text-2xl pt-4 pb-4 ${col === 'Actions' ? 'text-right' : ''}`}>{col}</TableHead>)}</TableRow></TableHeader><TableBody>{currentView.data && currentView.data.length > 0 ? currentView.data.map(renderTableRow) : renderTableRow(null, 0)}</TableBody></Table></div>) : (<div className="bg-black/50 backdrop-blur-lg border border-gray-700/50 rounded-lg overflow-hidden p-10 text-center text-slate-400">Select a category to view data.</div>)}
                     </>
                 </main>
             </div>

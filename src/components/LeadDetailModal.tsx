@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, User, Calendar, Info } from "lucide-react";
+import { Mail, Phone, User, Calendar, Info, Play } from "lucide-react";
 
 // Define the structure of a lead
 interface Lead {
@@ -12,7 +12,9 @@ interface Lead {
   experience: string;
   date: string;
   type: string;
+  interests?: string[];
   preferredTime?: string;
+  availability?: string;
   goal?: string;
   notes?: string;
 }
@@ -28,7 +30,7 @@ export function LeadDetailModal({ isOpen, onClose, lead }: LeadDetailModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#111827] border-slate-700 text-white max-w-lg p-0">
+      <DialogContent className="bg-[#0b0f18] border-slate-700 text-white max-w-2xl p-0 mt-2 overflow-y-auto max-h-[80vh]">
         <DialogHeader className="p-6 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg flex items-center justify-center">
@@ -73,6 +75,19 @@ export function LeadDetailModal({ isOpen, onClose, lead }: LeadDetailModalProps)
                         Additional Notes
                     </h3>
                     <InfoCard label="Notes" value={lead.notes} />
+                </div>
+            )}
+            {/* Interests Section */}
+            {lead.interests && lead.interests.length > 0 && (
+                <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-slate-300 flex items-center gap-2 border-t border-slate-700 pt-4">
+                        <Play className="w-4 h-4 text-pink-500"/>
+                        Project Details
+                    </h3>
+                    {lead.interests.map((interest, index) => (
+                        <InfoCard key={index} label={`Interest ${index + 1}`} value={interest} />
+                    ))}
+                    <InfoCard label="Availability" value={lead.availability} />
                 </div>
             )}
 

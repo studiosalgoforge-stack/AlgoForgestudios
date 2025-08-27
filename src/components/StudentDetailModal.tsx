@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 
 // Define the structure of a student
 interface Student {
+  phone?: string;
   _id: string;
   name: string;
   email: string;
@@ -63,7 +64,7 @@ export function StudentDetailModal({ isOpen, onClose, student, onStudentUpdated 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#111827] border-slate-700 text-white max-w-lg p-0">
+      <DialogContent className="bg-[#0b0f18] border-slate-700 text-white max-w-2xl p-0 mt-2 overflow-y-auto max-h-[80vh]">
         <DialogHeader className="p-6 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-blue-500 rounded-lg flex items-center justify-center">
@@ -112,8 +113,18 @@ export function StudentDetailModal({ isOpen, onClose, student, onStudentUpdated 
                   </Button>
                   {showContactOptions && (
                     <div className="absolute bottom-full mb-2 w-full bg-slate-800 border border-slate-700 rounded-lg p-2 space-y-2 animate-in fade-in-0 slide-in-from-bottom-2">
-                      <Button variant="outline" className="w-full justify-start"><Mail className="w-4 h-4 mr-2"/>Email</Button>
-                      <Button variant="outline" className="w-full justify-start"><Phone className="w-4 h-4 mr-2"/>Call</Button>
+                      <a href={`mailto:${student.email}`} className="flex-1">
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                          <Mail className="w-4 h-4 mr-2" />
+                          Send Email
+                        </Button>
+                      </a>
+                      <a href={`tel:${student.phone}`} className={`flex-1 ${!student.phone ? 'pointer-events-none' : ''}`}>
+                        <Button variant="outline" className="w-full" disabled={!student.phone}>
+                          <Phone className="w-4 h-4 mr-2" />
+                          Call
+                        </Button>
+                      </a>
                     </div>
                   )}
                 </div>
