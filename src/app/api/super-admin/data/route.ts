@@ -6,7 +6,7 @@ import Lead from '@/models/Lead';
 import Course from '@/models/Course';
 import { getAllBlogPosts } from '@/lib/blog-server';
 
-// --- Data Transformation Functions ---
+// --- Data Transformation Functions --
 
 const transformLeadData = (lead: any) => ({
   _id: lead._id.toString(),
