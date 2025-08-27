@@ -31,7 +31,7 @@ export function InstructorDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#111827] border-slate-700 text-white max-w-lg p-0">
+      <DialogContent className="bg-[#0b0f18] border-slate-700 text-white max-w-2xl p-0 mt-2 overflow-y-auto max-h-[80vh]">
         <DialogHeader className="p-6 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-r from-violet-500 to-purple-500 rounded-lg flex items-center justify-center">
@@ -54,10 +54,12 @@ export function InstructorDetailModal({
             <InfoCard label="Status" value={instructor.status} isBadge={true} />
           </div>
           <div className="flex gap-4 border-t border-slate-700 pt-4 mt-4">
-            <Button variant="outline" className="flex-1">
-              <Mail className="w-4 h-4 mr-2" />
-              Send Message
-            </Button>
+                <a href={`mailto:${instructor.email}`} className="flex-1">
+                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-purple-500/25">
+                        <Mail className="w-4 h-4 mr-2"/>
+                        Send Email
+                    </Button>
+                </a>
             <Button 
               variant="outline" 
               className="flex-1" 
