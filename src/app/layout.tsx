@@ -5,6 +5,18 @@ import { headers } from 'next/headers';
 import { MaintenancePage } from "@/components/maintenance-page";
 import AppLayout from '@/components/AppLayout';
 import Script from 'next/script'; // Import the Script component
+import type { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: "AlgoForge Studios",
+  description: "Transform your career or business with cutting-edge ML education and enterprise AI solutions. Join thousands of professionals mastering real-world machine learning skills.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
+};
 
 export default async function RootLayout({
   children,
@@ -47,4 +59,5 @@ export default async function RootLayout({
   );
 
 }
+
 
