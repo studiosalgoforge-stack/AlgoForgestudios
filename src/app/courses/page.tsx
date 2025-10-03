@@ -239,7 +239,7 @@ function CoursesContent() {
   // Course statistics
   const courseStats = useMemo(() => {
     const totalStudents = courses.reduce((sum, course) => {
-      const studentCount = parseInt(course.students?.replace(/[^0-9]/g, '') || '0');
+      const studentCount = parseInt(course.students?.replace(/[^0-9]/g, '') || '100');
       return sum + studentCount;
     }, 0);
     
@@ -760,3 +760,4 @@ export default function CoursesPage() {
     </Suspense>
   );
 }
+
