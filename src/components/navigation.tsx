@@ -613,7 +613,7 @@ export function Navigation() {
                 </span>
               </Link>
               {/* Learning Resources Link */}
-              <Link
+              {/* <Link
                 href="/learning-resources"
                 className="text-gray-300 hover:text-cyan-300 px-3 xl:px-4 py-3 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-cyan-500/10 hover:shadow-lg hover:shadow-cyan-500/20 group flex items-center space-x-1"
               >
@@ -621,7 +621,7 @@ export function Navigation() {
                 <span className="group-hover:bg-gradient-to-r group-hover:from-cyan-300 group-hover:to-purple-300 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
                   Learning Resources
                 </span>
-              </Link>
+              </Link> */}
               <Link
                 href="/blog"
                 className="text-gray-300 hover:text-cyan-300 px-3 xl:px-4 py-3 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-cyan-500/10 hover:shadow-lg hover:shadow-cyan-500/20 group"
@@ -1296,3 +1296,4 @@ export function Navigation() {
     </nav>
   );
 }
+
