@@ -8,8 +8,13 @@ import {
 } from "@google/generative-ai";
 
 // CORRECTED: Use the latest recommended model name
-const MODEL_NAME = "gemini-1.5-flash";
+const MODEL_NAME = "models/gemini-2.5-flash";
 const API_KEY = process.env.GOOGLE_API_KEY || "";
+if (!API_KEY) {
+  console.error("GOOGLE_API_KEY is missing. Check .env.local or your deployment secrets.");
+  
+}
+console.log("Using model:", MODEL_NAME);
 
 // Helper function to stream the response
 async function* streamResponse(stream: AsyncGenerator<any>) {
