@@ -133,7 +133,7 @@ export function MLHeroSection() {
   };
   
   const openWhatsApp = () => {
-    window.open("https://wa.me/8292222569", "_blank");
+    window.open("https://wa.me/7754897333", "_blank");
   };
 
   // useEffect(() => {
