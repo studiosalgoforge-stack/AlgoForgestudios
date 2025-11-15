@@ -98,20 +98,24 @@ export default async function RootLayout({
       <body className="dark bg-gradient-to-br from-black via-gray-900 to-black text-white min-h-screen">
         {/* Google Analytics */}
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-W9PX5MM194"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-W9PX5MM194');
-          `}
-        </Script>
+  async
+  src="https://www.googletagmanager.com/gtag/js?id=G-CFQYK79X85"
+  strategy="afterInteractive"
+/>
+
+<Script id="google-analytics" strategy="afterInteractive">
+  {`
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-CFQYK79X85');
+  `}
+</Script>
+
 
         <AppLayout>{children}</AppLayout>
       </body>
     </html>
   );
 }
+
