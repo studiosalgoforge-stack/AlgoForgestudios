@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
 import {
   ChevronDown,
   ChevronUp,
@@ -308,14 +309,74 @@ export default function CourseDetailPage({
   const [openModule, setOpenModule] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEnrollmentModalOpen, setIsEnrollmentModalOpen] = useState(false);
+const [isWishlisted, setIsWishlisted] = useState(false);
 
-  // Compact text truncation
+
+
+// Compact text truncation
   const descriptionText = useTruncatedText(course?.description || "", 80);
   const longDescriptionText = useTruncatedText(
     course?.longDescription || "",
     120
   );
   const prerequisitesText = useTruncatedText(course?.prerequisites || "", 100);
+
+
+  // --- NEW ACTION HANDLERS ---
+  
+  const handleToggleWishlist = () => {
+    setIsWishlisted(prev => !prev);
+    // **TODO: Implement API call to update the user's wishlist/like status using course.id or course._id**
+    console.log(`Course ${course?.title} ${isWishlisted ? 'removed from' : 'added to'} wishlist.`);
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: course?.title || 'Check out this course!',
+          text: course?.subtitle || course?.description || 'A great course to learn new skills.',
+          url: window.location.href, // Shares the current page URL
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+        alert('Sharing failed or was cancelled.');
+      }
+    } else {
+    
+      navigator.clipboard.writeText(window.location.href);
+      alert('Course link copied to clipboard!');
+    }
+  };
+const SYLLABUS_PDF_URL = '/assets/documents/course-syllabus.pdf';
+
+  const handleDownload = () => {
+  const link = document.createElement('a');
+    link.href = SYLLABUS_PDF_URL;
+    
+    // 2. Set the download attribute to force a file download 
+    //    and provide a default filename for the user's system.
+    link.setAttribute('download', `${course?.title || 'Course'}_Syllabus.pdf`);
+    
+    // 3. Append to the body, click it, and remove it immediately
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log(`Download triggered for: ${SYLLABUS_PDF_URL}`);
+  };
+
+  // Assuming a support number is available
+  const SUPPORT_NUMBER = '7754897333'; // Use your actual support number
+  const handleCallSupport = () => {
+    window.location.href = `tel:${SUPPORT_NUMBER}`;
+  };
+
+ const handleChatSupport = () => {
+
+    alert('Open chat icon below ');
+
+  };
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -654,7 +715,7 @@ export default function CourseDetailPage({
                 className="space-y-3"
               >
                 <h3 className="text-lg font-bold text-white">
-                  Skills You'll Master
+                  Skills You&apos;ll Master
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {course.skills.map((skill, index) => (
@@ -770,7 +831,7 @@ export default function CourseDetailPage({
                     <div className="space-y-2">
                       <h4 className="text-white font-medium flex items-center gap-1 text-xs">
                         <CheckCircle className="w-3 h-3 text-green-400" />
-                        What's Included:
+                        What&apos;s Included:
                       </h4>
                       <div className="space-y-1 text-xs">
                         {Number(course.lessons) !==0 && (
@@ -809,27 +870,40 @@ export default function CourseDetailPage({
                     {/* Compact Actions */}
                     <div className="pt-2 border-t border-gray-700/50">
                       <div className="grid grid-cols-3 gap-1">
-                        <Button
+                       <Button
+                          onClick={handleToggleWishlist}
                           variant="outline"
                           size="sm"
-                          className="border-gray-600 text-gray-300 hover:border-cyan-400 hover:text-cyan-400 transition-colors h-7"
+                          // Conditional styling for wishlist status
+                          className={`border-gray-600 text-gray-300 transition-colors h-7 ${
+                            isWishlisted
+                              ? "border-red-500 text-red-400 hover:bg-red-900/20"
+                              : "hover:border-cyan-400 hover:text-cyan-400"
+                          }`}
                         >
-                          <Heart className="w-3 h-3" />
+                          <Heart className={`w-3 h-3 ${isWishlisted ? 'fill-red-400' : ''}`} />
                         </Button>
+
+                       {/* SHARE */}
                         <Button
+                          onClick={handleShare}
                           variant="outline"
                           size="sm"
                           className="border-gray-600 text-gray-300 hover:border-cyan-400 hover:text-cyan-400 transition-colors h-7"
                         >
                           <Share2 className="w-3 h-3" />
-                        </Button>
+                          </Button>
+
+                       {/* DOWNLOAD */}
                         <Button
+                          onClick={handleDownload}
                           variant="outline"
                           size="sm"
                           className="border-gray-600 text-gray-300 hover:border-cyan-400 hover:text-cyan-400 transition-colors h-7"
                         >
                           <Download className="w-3 h-3" />
                         </Button>
+
                       </div>
                     </div>
 
@@ -837,7 +911,9 @@ export default function CourseDetailPage({
                     <div className="pt-2 border-t border-gray-700/50 text-center">
                       <p className="text-xs text-gray-400 mb-2">Need help?</p>
                       <div className="flex justify-center space-x-2">
+                        {/* CALL */}
                         <Button
+                          onClick={handleCallSupport}
                           variant="ghost"
                           size="sm"
                           className="text-cyan-400 hover:bg-cyan-500/10 transition-colors text-xs h-6"
@@ -845,7 +921,11 @@ export default function CourseDetailPage({
                           <Phone className="w-3 h-3 mr-1" />
                           Call
                         </Button>
+
+
+                       {/* CHAT */}
                         <Button
+                          onClick={handleChatSupport}
                           variant="ghost"
                           size="sm"
                           className="text-cyan-400 hover:bg-cyan-500/10 transition-colors text-xs h-6"
@@ -853,6 +933,7 @@ export default function CourseDetailPage({
                           <MessageSquare className="w-3 h-3 mr-1" />
                           Chat
                         </Button>
+
                       </div>
                     </div>
                   </div>
@@ -1085,6 +1166,7 @@ export default function CourseDetailPage({
         isOpen={isEnrollmentModalOpen}
         onClose={() => setIsEnrollmentModalOpen(false)}
       />
+  
     </main>
   );
 }
