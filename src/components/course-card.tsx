@@ -163,7 +163,16 @@ export function CourseCard({ course, inView, index }: { course: Course, inView: 
               className="text-gray-700"
               title={course.students}
             >
-              {truncateText(course.students || '0', 10)}
+             {truncateText(
+  `${(
+    course?.students && Number(course.students) > 0
+      ? Number(course.students)
+      : Math.floor(Math.random() * 51) + 100
+  )}+`,
+10)}
+
+
+
             </span>
           </div>
           <div className="flex items-center gap-1">
