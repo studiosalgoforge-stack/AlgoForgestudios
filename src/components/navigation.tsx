@@ -752,8 +752,8 @@ export function Navigation() {
                 >
                   <button className="flex items-center space-x-2 text-white hover:text-cyan-400 px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-cyan-500/10 hover:shadow-lg hover:shadow-cyan-500/20 group">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
-                      {(currentUser?.name || 'A').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                    </div>
+                                              {(currentUser?.name || 'A').split(' ').map((n: string) => n[0] ?? '').join('').substring(0, 2).toUpperCase()}
+                                            </div>
                     <div className="hidden xl:block text-left">
                       <p className="text-sm font-medium text-white group-hover:text-cyan-300 transition-colors">
                         {currentUser?.name || currentUser?.email}
@@ -776,8 +776,8 @@ export function Navigation() {
                       {/* Profile Header */}
                       <div className="flex items-center space-x-3 pb-3 mb-3 border-b border-cyan-500/20">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
-                          {(currentUser?.name || 'A').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                        </div>
+                                                  {(currentUser?.name || 'A').split(' ').map((n: string) => n[0] ?? '').join('').substring(0, 2).toUpperCase()}
+                                                </div>
                         <div className="flex-1">
                           <h3 className="text-white font-semibold text-base">
                             {currentUser?.name || currentUser?.email}

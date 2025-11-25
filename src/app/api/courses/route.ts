@@ -55,6 +55,32 @@ const validateCourseData = (data: any) => {
   //   throw new Error('Course category must be a string');
   // }
 
+  // --- NORMALIZE courseCategory ---
+if (data.courseCategory) {
+  if (typeof data.courseCategory !== 'string') {
+    throw new Error('courseCategory must be a string');
+  }
+
+  data.courseCategory = data.courseCategory.trim();
+
+  const validCourseCategories = [
+    'Data Science',
+    'Full Stack Development',
+    'Cyber Security',
+    'Finance & Marketing',
+    'Big Data Analytics',
+    'Machine Learning',
+    'Data Analytics & BI',
+    'Business Analytics & AI',
+    'Generative AI',
+    'HR Analytics'
+  ];
+
+  if (!validCourseCategories.includes(data.courseCategory)) {
+    throw new Error(`Invalid courseCategory: ${data.courseCategory}`);
+  }
+}
+
   return data;
 };
 

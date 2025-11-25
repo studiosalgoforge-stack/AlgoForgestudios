@@ -34,7 +34,12 @@ import {
   Code,
   Database,
   Sparkles,
-  BarChart3
+  BarChart3,
+  LineChart,
+  Cpu,
+  BarChart,
+  Briefcase,
+  Shield
 } from "lucide-react";
 import { CourseCard } from "@/components/course-card";
 
@@ -56,6 +61,12 @@ interface Course {
   students?: string;
   rating?: number;
   mode?: string;
+  featured?: boolean;
+  trending?: boolean;
+  isFree?: boolean;
+  iconName?: string;
+  bgImage?: string;
+  gradient?: string;
   curriculum?: Array<{
     module: string;
     lessons: number;
@@ -90,43 +101,97 @@ function CoursesContent() {
   }, [searchParams]);
 
   // Enhanced category mapping with icons and descriptions - matching Course model
-  const courseCategories = useMemo(() => [
-    { 
-      value: "all", 
-      label: "All Categories",
-      icon: Grid3X3,
-      description: "Browse all available courses",
-      gradient: "from-cyan-500 to-purple-500"
-    },
-    {
-      value: "Data Analytics & Business Intelligence",
-      label: "Data Analytics & BI",
-      icon: BarChart3,
-      description: "Transform data into actionable insights",
-      gradient: "from-blue-500 to-indigo-500"
-    },
-    {
-      value: "Data Science",
-      label: "Data Science",
-      icon: Database,
-      description: "Master data manipulation and statistical analysis",
-      gradient: "from-emerald-500 to-teal-500"
-    },
-    {
-      value: "Machine Learning",
-      label: "Machine Learning",
-      icon: Code,
-      description: "Build intelligent systems and algorithms",
-      gradient: "from-orange-500 to-red-500"
-    },
-    { 
-      value: "Generative AI (Gen AI)", 
-      label: "Generative AI",
-      icon: Brain,
-      description: "Master the future of AI technology",
-      gradient: "from-purple-500 to-pink-500"
-    },
-  ], []);
+ const courseCategories = useMemo(() => [
+  { 
+    value: "all", 
+    label: "All Categories",
+    icon: Grid3X3,
+    description: "Browse all available courses",
+    gradient: "from-cyan-500 to-purple-500"
+  },
+
+  {
+    value: "Data Science",
+    label: "Data Science",
+    icon: Database,
+    description: "Master data manipulation and statistical analysis",
+    gradient: "from-emerald-500 to-teal-500"
+  },
+
+  {
+    value: "Full Stack Development",
+    label: "Full Stack Development",
+    icon: Code,
+    description: "Learn front-end, back-end & deployment",
+    gradient: "from-blue-500 to-indigo-500"
+  },
+
+  {
+    value: "Cyber Security",
+    label: "Cyber Security",
+    icon: Shield,
+    description: "Protect systems and networks from attacks",
+    gradient: "from-red-500 to-orange-500"
+  },
+
+  {
+    value: "Finance & Marketing",
+    label: "Finance & Marketing",
+    icon: LineChart,
+    description: "Master business, finance and marketing strategies",
+    gradient: "from-yellow-500 to-amber-500"
+  },
+
+  {
+    value: "Big Data Analytics",
+    label: "Big Data Analytics",
+    icon: BarChart3,
+    description: "Process & analyze massive datasets",
+    gradient: "from-purple-500 to-fuchsia-500"
+  },
+
+  {
+    value: "Machine Learning",
+    label: "Machine Learning",
+    icon: Cpu,
+    description: "Build intelligent algorithms and automation",
+    gradient: "from-orange-500 to-red-500"
+  },
+
+  {
+    value: "Data Analytics & BI",
+    label: "Data Analytics & PowerBI",
+    icon: BarChart,
+    description: "Transform data into actionable insights",
+    gradient: "from-blue-500 to-indigo-500"
+  },
+
+  {
+    value: "Business Analytics & AI",
+    label: "Business Analytics & AI",
+    icon: Briefcase,
+    description: "AI-powered business intelligence",
+    gradient: "from-rose-500 to-pink-500"
+  },
+
+  {
+    value: "Generative AI",
+    label: "Generative AI",
+    icon: Brain,
+    description: "Master modern generative AI tools",
+    gradient: "from-purple-500 to-pink-500"
+  },
+
+  {
+    value: "HR Analytics",
+    label: "HR Analytics",
+    icon: Users,
+    description: "Use analytics to improve HR performance",
+    gradient: "from-green-500 to-emerald-500"
+  },
+
+], []);
+
 
   const levels = useMemo(() => [
     { value: "all", label: "All Levels" },
@@ -215,7 +280,7 @@ function CoursesContent() {
 
   // Get courses by category for category view
   const coursesByCategory = useMemo(() => {
-    const categorized = {};
+    const categorized: Record<string, Course[]> = {};
     courses.forEach(course => {
       const category = course.courseCategory || 'Other';
       if (!categorized[category]) {
@@ -531,7 +596,10 @@ function CoursesContent() {
                             FREE
                           </div>
                           <CourseCard
-                            course={course}
+                            course={{
+                              ...course,
+                              iconName: course.iconName ?? "Brain"
+                            }}
                             inView={true}
                             index={index}
                           />
@@ -586,7 +654,10 @@ function CoursesContent() {
                         className="transform-gpu"
                       >
                         <CourseCard
-                          course={course}
+                          course={{
+                            ...course,
+                            iconName: course.iconName ?? "Brain"
+                          }}
                           inView={true}
                           index={index}
                         />
@@ -687,7 +758,10 @@ function CoursesContent() {
                                 className="group"
                               >
                                 <CourseCard
-                                  course={course}
+                                  course={{
+                                    ...course,
+                                    iconName: course.iconName ?? "Brain"
+                                  }}
                                   inView={true}
                                   index={index}
                                 />

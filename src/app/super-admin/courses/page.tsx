@@ -5,7 +5,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 // --- NEW --- Import useRouter
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -33,7 +33,18 @@ import {
   ModalTitle,
 } from "@/components/ui/modal";
 // --- NEW --- Import the extra icons needed for the upload buttons
-import { Loader2, Edit, Trash, Plus, Search, X, Save, Video, FileText, Presentation } from "lucide-react";
+import {
+  Loader2,
+  Edit,
+  Trash,
+  Plus,
+  Search,
+  X,
+  Save,
+  Video,
+  FileText,
+  Presentation,
+} from "lucide-react";
 // --- NEW --- Import the UploadModal component (you will create this file next)
 import { UploadModal } from "@/components/UploadModal";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
@@ -41,17 +52,12 @@ import { ConfirmationModal } from "@/components/ConfirmationModal";
 /* -------------------------------------------------------------------- */
 /* Types                                                               */
 /* -------------------------------------------------------------------- */
-// --- NEW --- Define a type for a module to ensure type safety in your component
-interface IModule {
-  _id: string;
-  title: string;
-  content: any[]; // You can define a more specific IContent interface later if you wish
-}
+// IModule will be defined below using the specific IContent type (avoid duplicate declarations)
 
 interface IContent {
   _id: string;
   title: string;
-  type: 'VIDEO' | 'PPT' | 'NOTES';
+  type: "VIDEO" | "PPT" | "NOTES";
   thumbnailUrl?: string;
 }
 
@@ -61,7 +67,6 @@ interface IModule {
   title: string;
   content: IContent[]; // Use the new, more specific type
 }
-
 
 interface Course {
   id?: string;
@@ -128,7 +133,8 @@ const ManageCoursesPage = () => {
   // --- NEW --- Initialize router
   const router = useRouter();
   /* -------------------- state -------------------------------------- */
-  const [showDeleteContentConfirm, setShowDeleteContentConfirm] = useState(false);
+  const [showDeleteContentConfirm, setShowDeleteContentConfirm] =
+    useState(false);
   const [contentToDelete, setContentToDelete] = useState<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
@@ -136,7 +142,7 @@ const ManageCoursesPage = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [currentCourse, setCurrentCourse] = useState<Partial<Course> | null>(
-    null,
+    null
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -158,9 +164,8 @@ const ManageCoursesPage = () => {
   const [uploadConfig, setUploadConfig] = useState<{
     courseId: string;
     moduleId: string;
-    contentType: 'VIDEO' | 'PPT' | 'NOTES';
+    contentType: "VIDEO" | "PPT" | "NOTES";
   } | null>(null);
-
 
   /* -------------------- effects ------------------------------------ */
   useEffect(() => {
@@ -177,7 +182,9 @@ const ManageCoursesPage = () => {
       results = results.filter((c) => c.category === filterCategory);
     }
     if (filterCourseCategory !== "all") {
-      results = results.filter((c) => c.courseCategory === filterCourseCategory);
+      results = results.filter(
+        (c) => c.courseCategory === filterCourseCategory
+      );
     }
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
@@ -186,7 +193,7 @@ const ManageCoursesPage = () => {
           c.title.toLowerCase().includes(q) ||
           c.description.toLowerCase().includes(q) ||
           c.category.toLowerCase().includes(q) ||
-          (c.instructor && c.instructor.toLowerCase().includes(q)),
+          (c.instructor && c.instructor.toLowerCase().includes(q))
       );
     }
     setFilteredCourses(results);
@@ -288,8 +295,14 @@ const ManageCoursesPage = () => {
 
     const courseData = {
       ...currentCourse,
-      skills: skillsInput.split(",").map((s) => s.trim()).filter(Boolean),
-      tags: tagsInput.split(",").map((s) => s.trim()).filter(Boolean),
+      skills: skillsInput
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      tags: tagsInput
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
       lessons: Number(currentCourse.lessons) || 0,
       projects: Number(currentCourse.projects) || 0,
       rating: Number(currentCourse.rating) || 0,
@@ -301,7 +314,7 @@ const ManageCoursesPage = () => {
         const id = currentCourse.id ?? currentCourse._id;
         const res = await axios.put(`/api/courses/${id}`, courseData);
         setCourses((prev) =>
-          prev.map((c) => ((c.id ?? c._id) === id ? res.data.course : c)),
+          prev.map((c) => ((c.id ?? c._id) === id ? res.data.course : c))
         );
         alert("Course updated successfully!");
         setShowModal(false); // Close modal on successful update
@@ -310,7 +323,9 @@ const ManageCoursesPage = () => {
         const res = await axios.post("/api/courses", courseData);
         const newCourse = res.data.course;
         setCourses((prev) => [...prev, newCourse]);
-        alert("Course created successfully! You can now add modules and content.");
+        alert(
+          "Course created successfully! You can now add modules and content."
+        );
         // --- NEW --- Instead of closing, update the state with the new course ID to unlock the content section
         setCurrentCourse({ ...newCourse, id: newCourse._id });
       }
@@ -325,17 +340,19 @@ const ManageCoursesPage = () => {
   // --- NEW --- Handlers for adding modules and opening the upload modal
   const handleAddModule = async () => {
     if (!newModuleTitle.trim() || !currentCourse?._id) {
-      alert("Module title cannot be empty, and the course must be saved before adding modules.");
+      alert(
+        "Module title cannot be empty, and the course must be saved before adding modules."
+      );
       return;
     }
     try {
-      const res = await axios.post('/api/modules', {
+      const res = await axios.post("/api/modules", {
         title: newModuleTitle,
         courseId: currentCourse._id,
       });
       const newModule = res.data;
       // Update the state to show the new module immediately in the UI
-      setCurrentCourse(prev => ({
+      setCurrentCourse((prev) => ({
         ...prev,
         modules: [...(prev?.modules || []), newModule],
       }));
@@ -354,11 +371,11 @@ const ManageCoursesPage = () => {
       await axios.delete(`/api/modules/${moduleToDelete}`);
 
       // Update the UI instantly by removing the module from the state
-      setCurrentCourse(prev => {
+      setCurrentCourse((prev) => {
         if (!prev || !prev.modules) return prev;
         return {
           ...prev,
-          modules: prev.modules.filter(m => m._id !== moduleToDelete),
+          modules: prev.modules.filter((m) => m._id !== moduleToDelete),
         };
       });
 
@@ -376,9 +393,12 @@ const ManageCoursesPage = () => {
   const openDeleteConfirm = (moduleId: string) => {
     setModuleToDelete(moduleId);
     setShowDeleteConfirm(true);
-  }
+  };
 
-  const handleOpenUploadModal = (moduleId: string, contentType: 'VIDEO' | 'PPT' | 'NOTES') => {
+  const handleOpenUploadModal = (
+    moduleId: string,
+    contentType: "VIDEO" | "PPT" | "NOTES"
+  ) => {
     setUploadConfig({
       courseId: currentCourse?._id!,
       moduleId,
@@ -391,7 +411,7 @@ const ManageCoursesPage = () => {
   /* Helpers for dynamic changes                                       */
   /* ------------------------------------------------------------------ */
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setCurrentCourse((prev) => ({ ...prev, [name]: value }));
@@ -414,11 +434,11 @@ const ManageCoursesPage = () => {
       await axios.delete(`/api/content/${contentToDelete}`);
 
       // Instantly update the UI
-      setCurrentCourse(prev => {
+      setCurrentCourse((prev) => {
         if (!prev || !prev.modules) return prev;
-        const newModules = prev.modules.map(module => ({
+        const newModules = prev.modules.map((module) => ({
           ...module,
-          content: module.content.filter(c => c._id !== contentToDelete),
+          content: module.content.filter((c) => c._id !== contentToDelete),
         }));
         return { ...prev, modules: newModules };
       });
@@ -435,7 +455,9 @@ const ManageCoursesPage = () => {
 
   const handleEditContentClick = (contentId: string) => {
     // Navigate to the new edit page
-    router.push(`/super-admin/courses/${currentCourse?._id}/edit-content/${contentId}`);
+    router.push(
+      `/super-admin/courses/${currentCourse?._id}/edit-content/${contentId}`
+    );
   };
 
   /* ------------------------------------------------------------------ */
@@ -468,7 +490,9 @@ const ManageCoursesPage = () => {
         {/* Filters --------------------------------------------------- */}
         <Card className="mb-6 sm:mb-8 bg-gray-900 border border-gray-800">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg text-gray-100">Filters</CardTitle>
+            <CardTitle className="text-base sm:text-lg text-gray-100">
+              Filters
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
             {/* Mobile: Stack filters vertically, Tablet+: Grid layout */}
@@ -490,10 +514,30 @@ const ManageCoursesPage = () => {
                   <SelectValue placeholder="Level" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-900 border border-gray-700 text-gray-200">
-                  <SelectItem value="all" className="focus:bg-gray-800 focus:text-gray-100 text-sm">All Levels</SelectItem>
-                  <SelectItem value="Beginner" className="focus:bg-gray-800 focus:text-gray-100 text-sm">Beginner</SelectItem>
-                  <SelectItem value="Intermediate" className="focus:bg-gray-800 focus:text-gray-100 text-sm">Intermediate</SelectItem>
-                  <SelectItem value="Advanced" className="focus:bg-gray-800 focus:text-gray-100 text-sm">Advanced</SelectItem>
+                  <SelectItem
+                    value="all"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    All Levels
+                  </SelectItem>
+                  <SelectItem
+                    value="Beginner"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Beginner
+                  </SelectItem>
+                  <SelectItem
+                    value="Intermediate"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Intermediate
+                  </SelectItem>
+                  <SelectItem
+                    value="Advanced"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Advanced
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -503,10 +547,30 @@ const ManageCoursesPage = () => {
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-900 border border-gray-700 text-gray-200">
-                  <SelectItem value="all" className="focus:bg-gray-800 focus:text-gray-100 text-sm">All Categories</SelectItem>
-                  <SelectItem value="students" className="focus:bg-gray-800 focus:text-gray-100 text-sm">Students</SelectItem>
-                  <SelectItem value="professionals" className="focus:bg-gray-800 focus:text-gray-100 text-sm">Professionals</SelectItem>
-                  <SelectItem value="corporates" className="focus:bg-gray-800 focus:text-gray-100 text-sm">Corporates</SelectItem>
+                  <SelectItem
+                    value="all"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    All Categories
+                  </SelectItem>
+                  <SelectItem
+                    value="students"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Students
+                  </SelectItem>
+                  <SelectItem
+                    value="professionals"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Professionals
+                  </SelectItem>
+                  <SelectItem
+                    value="corporates"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Corporates
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -519,18 +583,71 @@ const ManageCoursesPage = () => {
                   <SelectValue placeholder="Course Category" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-900 border border-gray-700 text-gray-200">
-                  <SelectItem value="all" className="focus:bg-gray-800 focus:text-gray-100 text-sm">All Course Categories</SelectItem>
-                  <SelectItem value="Data Analytics & Business Intelligence" className="focus:bg-gray-800 focus:text-gray-100 text-sm">
-                    Data Analytics &amp; Business Intelligence
+                  <SelectItem
+                    value="all"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    All Course Categories
                   </SelectItem>
-                  <SelectItem value="Data Science" className="focus:bg-gray-800 focus:text-gray-100 text-sm">
+                  <SelectItem
+                    value="Full Stack Development"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Full Stack Development
+                  </SelectItem>
+                  <SelectItem
+                    value="Data Science"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
                     Data Science
                   </SelectItem>
-                  <SelectItem value="Machine Learning" className="focus:bg-gray-800 focus:text-gray-100 text-sm">
+                  <SelectItem
+                    value="Machine Learning"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
                     Machine Learning
                   </SelectItem>
-                  <SelectItem value="Generative AI (Gen AI)" className="focus:bg-gray-800 focus:text-gray-100 text-sm">
-                    Generative AI (Gen AI)
+                  <SelectItem
+                    value="Cyber Security"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Cyber Security
+                  </SelectItem>
+                  <SelectItem
+                    value="Data Analytics & BI"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Data Analytics & BI
+                  </SelectItem>
+                  <SelectItem
+                    value="Business Analytics & AI"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Business Analytics & AI
+                  </SelectItem>
+                  <SelectItem
+                    value="Finance & Marketing"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Finance & Marketing
+                  </SelectItem>
+                  <SelectItem
+                    value="Generative AI"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Generative AI
+                  </SelectItem>
+                  <SelectItem
+                    value="Big Data Analytics"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    Big Data Analytics
+                  </SelectItem>
+                  <SelectItem
+                    value="HR Analytics"
+                    className="focus:bg-gray-800 focus:text-gray-100 text-sm"
+                  >
+                    HR Analytics
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -540,19 +657,19 @@ const ManageCoursesPage = () => {
                 filterLevel !== "all" ||
                 filterCategory !== "all" ||
                 filterCourseCategory !== "all") && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setSearchTerm("");
-                      setFilterLevel("all");
-                      setFilterCategory("all");
-                      setFilterCourseCategory("all");
-                    }}
-                    className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-gray-100 text-sm w-full sm:w-auto"
-                  >
-                    <X className="mr-2 h-4 w-4" /> Clear
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setFilterLevel("all");
+                    setFilterCategory("all");
+                    setFilterCourseCategory("all");
+                  }}
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-gray-100 text-sm w-full sm:w-auto"
+                >
+                  <X className="mr-2 h-4 w-4" /> Clear
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -610,16 +727,18 @@ const ManageCoursesPage = () => {
                         {/* Badges - Responsive layout */}
                         <div className="flex flex-wrap gap-1.5 sm:gap-2">
                           <Badge
-                            className={`text-xs px-2 py-0.5 ${levelColours[course.level ?? ""] ??
+                            className={`text-xs px-2 py-0.5 ${
+                              levelColours[course.level ?? ""] ??
                               "bg-gray-800/50 border-gray-700 text-gray-400"
-                              }`}
+                            }`}
                           >
                             {course.level}
                           </Badge>
                           <Badge
-                            className={`text-xs px-2 py-0.5 ${categoryColours[course.category] ??
+                            className={`text-xs px-2 py-0.5 ${
+                              categoryColours[course.category] ??
                               "bg-gray-800/50 border-gray-700 text-gray-400"
-                              }`}
+                            }`}
                           >
                             {course.category}
                           </Badge>
@@ -702,7 +821,7 @@ const ManageCoursesPage = () => {
                 onChange={handleInputChange}
                 placeholder="Course title"
                 className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base"
-                disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                disabled={false} // --- NEW --- Disable after creation
               />
             </div>
 
@@ -717,7 +836,7 @@ const ManageCoursesPage = () => {
                 onChange={handleInputChange}
                 placeholder="Course subtitle"
                 className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base"
-                disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                disabled={false} // --- NEW --- Disable after creation
               />
             </div>
 
@@ -733,7 +852,7 @@ const ManageCoursesPage = () => {
                 placeholder="Short description"
                 rows={3}
                 className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base resize-none"
-                disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                disabled={false} // --- NEW --- Disable after creation
               />
             </div>
 
@@ -749,7 +868,7 @@ const ManageCoursesPage = () => {
                 placeholder="Detailed description"
                 rows={4}
                 className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base resize-none"
-                disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                disabled={false} // --- NEW --- Disable after creation
               />
             </div>
 
@@ -766,7 +885,7 @@ const ManageCoursesPage = () => {
                   onChange={handleInputChange}
                   placeholder="e.g., 8 weeks"
                   className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base"
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 />
               </div>
 
@@ -778,16 +897,36 @@ const ManageCoursesPage = () => {
                 <Select
                   value={currentCourse?.level || ""}
                   onValueChange={(v) => handleSelectChange("level", v)}
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 >
                   <SelectTrigger className="bg-gray-800 border border-gray-700 text-gray-200 focus:ring-gray-500 text-sm sm:text-base">
                     <SelectValue placeholder="Select level" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-900 border border-gray-700 text-gray-200">
-                    <SelectItem value="Beginner" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">Beginner</SelectItem>
-                    <SelectItem value="Intermediate" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">Intermediate</SelectItem>
-                    <SelectItem value="Advanced" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">Advanced</SelectItem>
-                    <SelectItem value="All Levels" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">All Levels</SelectItem>
+                    <SelectItem
+                      value="Beginner"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Beginner
+                    </SelectItem>
+                    <SelectItem
+                      value="Intermediate"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Intermediate
+                    </SelectItem>
+                    <SelectItem
+                      value="Advanced"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Advanced
+                    </SelectItem>
+                    <SelectItem
+                      value="All Levels"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      All Levels
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -800,15 +939,30 @@ const ManageCoursesPage = () => {
                 <Select
                   value={currentCourse?.category || ""}
                   onValueChange={(v) => handleSelectChange("category", v)}
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 >
                   <SelectTrigger className="bg-gray-800 border border-gray-700 text-gray-200 focus:ring-gray-500 text-sm sm:text-base">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-900 border border-gray-700 text-gray-200">
-                    <SelectItem value="students" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">Students</SelectItem>
-                    <SelectItem value="professionals" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">Professionals</SelectItem>
-                    <SelectItem value="corporates" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">Corporates</SelectItem>
+                    <SelectItem
+                      value="students"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Students
+                    </SelectItem>
+                    <SelectItem
+                      value="professionals"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Professionals
+                    </SelectItem>
+                    <SelectItem
+                      value="corporates"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Corporates
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -821,23 +975,71 @@ const ManageCoursesPage = () => {
                 <Select
                   value={currentCourse?.courseCategory || ""}
                   onValueChange={(v) => handleSelectChange("courseCategory", v)}
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 >
                   <SelectTrigger className="bg-gray-800 border border-gray-700 text-gray-200 focus:ring-gray-500 text-sm sm:text-base">
                     <SelectValue placeholder="Course category" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-900 border border-gray-700 text-gray-200">
-                    <SelectItem value="Data Analytics & Business Intelligence" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">
-                      Data Analytics &amp; Business Intelligence
+                    <SelectItem
+                      value="Full Stack Development"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Full Stack Development
                     </SelectItem>
-                    <SelectItem value="Data Science" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">
+                    <SelectItem
+                      value="Data Science"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
                       Data Science
                     </SelectItem>
-                    <SelectItem value="Machine Learning" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">
+                    <SelectItem
+                      value="Machine Learning"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
                       Machine Learning
                     </SelectItem>
-                    <SelectItem value="Generative AI (Gen AI)" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">
-                      Generative AI (Gen AI)
+                    <SelectItem
+                      value="Cyber Security"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Cyber Security
+                    </SelectItem>
+                    <SelectItem
+                      value="Data Analytics & BI"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Data Analytics & BI
+                    </SelectItem>
+                    <SelectItem
+                      value="Business Analytics & AI"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Business Analytics & AI
+                    </SelectItem>
+                    <SelectItem
+                      value="Finance & Marketing"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Finance & Marketing
+                    </SelectItem>
+                    <SelectItem
+                      value="Generative AI"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Generative AI
+                    </SelectItem>
+                    <SelectItem
+                      value="Big Data Analytics"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Big Data Analytics
+                    </SelectItem>
+                    <SelectItem
+                      value="HR Analytics"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      HR Analytics
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -851,16 +1053,36 @@ const ManageCoursesPage = () => {
                 <Select
                   value={currentCourse?.mode || ""}
                   onValueChange={(v) => handleSelectChange("mode", v)}
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 >
                   <SelectTrigger className="bg-gray-800 border border-gray-700 text-gray-200 focus:ring-gray-500 text-sm sm:text-base">
                     <SelectValue placeholder="Mode" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-900 border border-gray-700 text-gray-200">
-                    <SelectItem value="Online" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">Online</SelectItem>
-                    <SelectItem value="Hybrid" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">Hybrid</SelectItem>
-                    <SelectItem value="Weekend" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">Weekend</SelectItem>
-                    <SelectItem value="Evening" className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base">Evening</SelectItem>
+                    <SelectItem
+                      value="Online"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Online
+                    </SelectItem>
+                    <SelectItem
+                      value="Hybrid"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Hybrid
+                    </SelectItem>
+                    <SelectItem
+                      value="Weekend"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Weekend
+                    </SelectItem>
+                    <SelectItem
+                      value="Evening"
+                      className="focus:bg-gray-800 focus:text-gray-100 text-sm sm:text-base"
+                    >
+                      Evening
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -876,7 +1098,7 @@ const ManageCoursesPage = () => {
                   onChange={handleInputChange}
                   placeholder="$299"
                   className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base"
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 />
               </div>
 
@@ -891,7 +1113,7 @@ const ManageCoursesPage = () => {
                   onChange={handleInputChange}
                   placeholder="$399"
                   className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base"
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 />
               </div>
 
@@ -907,7 +1129,7 @@ const ManageCoursesPage = () => {
                   onChange={handleInputChange}
                   placeholder="0"
                   className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base"
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 />
               </div>
 
@@ -923,7 +1145,7 @@ const ManageCoursesPage = () => {
                   onChange={handleInputChange}
                   placeholder="0"
                   className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base"
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 />
               </div>
             </div>
@@ -939,7 +1161,7 @@ const ManageCoursesPage = () => {
                 onChange={handleInputChange}
                 placeholder="Instructor name"
                 className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base"
-                disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                disabled={false} // --- NEW --- Disable after creation
               />
             </div>
 
@@ -953,7 +1175,7 @@ const ManageCoursesPage = () => {
                 onChange={(e) => setSkillsInput(e.target.value)}
                 placeholder="JavaScript, React"
                 className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base"
-                disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                disabled={false} // --- NEW --- Disable after creation
               />
             </div>
 
@@ -967,7 +1189,7 @@ const ManageCoursesPage = () => {
                 onChange={(e) => setTagsInput(e.target.value)}
                 placeholder="web-dev, frontend"
                 className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base"
-                disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                disabled={false} // --- NEW --- Disable after creation
               />
             </div>
 
@@ -983,7 +1205,7 @@ const ManageCoursesPage = () => {
                 placeholder="Any prerequisites"
                 rows={3}
                 className="bg-gray-800 border border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-gray-200 placeholder:text-gray-500 text-sm sm:text-base resize-none"
-                disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                disabled={false} // --- NEW --- Disable after creation
               />
             </div>
 
@@ -1000,7 +1222,7 @@ const ManageCoursesPage = () => {
                     }))
                   }
                   className="accent-cyan-500"
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 />
                 Featured
               </label>
@@ -1016,7 +1238,7 @@ const ManageCoursesPage = () => {
                     }))
                   }
                   className="accent-violet-500"
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 />
                 Trending
               </label>
@@ -1032,7 +1254,7 @@ const ManageCoursesPage = () => {
                     }))
                   }
                   className="accent-purple-500"
-                  disabled={!!currentCourse?._id} // --- NEW --- Disable after creation
+                  disabled={false} // --- NEW --- Disable after creation
                 />
                 Certificate
               </label>
@@ -1041,17 +1263,24 @@ const ManageCoursesPage = () => {
             {/* --- NEW SECTION FOR COURSE CONTENT & MODULES --- */}
             {/* --- This section is now always visible, but its content changes based on if the course is saved --- */}
             <div className="pt-6 border-t border-gray-700 mt-6">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-100 mb-4">Course Content & Modules</h3>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-100 mb-4">
+                Course Content & Modules
+              </h3>
 
               {/* --- This logic shows the content manager if the course has an ID, or a message if it's a new course --- */}
               {currentCourse?._id ? (
                 <>
                   {/* Display Existing Modules */}
                   <div className="space-y-4">
-                    {currentCourse.modules?.map(module => (
-                      <div key={module._id} className="bg-gray-850/50 p-4 rounded-lg border border-gray-700">
+                    {currentCourse.modules?.map((module) => (
+                      <div
+                        key={module._id}
+                        className="bg-gray-850/50 p-4 rounded-lg border border-gray-700"
+                      >
                         <div className="flex justify-between items-center mb-3">
-                          <p className="font-semibold text-gray-100 text-base">{module.title}</p>
+                          <p className="font-semibold text-gray-100 text-base">
+                            {module.title}
+                          </p>
                           <Button
                             variant="destructive"
                             size="icon"
@@ -1065,56 +1294,109 @@ const ManageCoursesPage = () => {
                         {/* --- NEW --- Content Item List */}
                         <div className="space-y-2 pt-3 border-t border-gray-700/50">
                           {module.content && module.content.length > 0 ? (
-                            module.content.map(item => (
-                              <div key={item._id} className="flex items-center justify-between bg-gray-900/50 p-2 rounded-md">
+                            module.content.map((item) => (
+                              <div
+                                key={item._id}
+                                className="flex items-center justify-between bg-gray-900/50 p-2 rounded-md"
+                              >
                                 <div className="flex items-center gap-3">
                                   <div className="flex-shrink-0 h-10 w-16 bg-gray-700 rounded-sm flex items-center justify-center">
                                     {item.thumbnailUrl ? (
-                                      <img src={item.thumbnailUrl} alt={item.title} className="h-full w-full object-cover rounded-sm" />
+                                      <img
+                                        src={item.thumbnailUrl}
+                                        alt={item.title}
+                                        className="h-full w-full object-cover rounded-sm"
+                                      />
+                                    ) : item.type === "VIDEO" ? (
+                                      <Video className="h-5 w-5 text-gray-400" />
+                                    ) : item.type === "PPT" ? (
+                                      <Presentation className="h-5 w-5 text-gray-400" />
                                     ) : (
-                                      item.type === 'VIDEO' ? <Video className="h-5 w-5 text-gray-400" /> :
-                                        item.type === 'PPT' ? <Presentation className="h-5 w-5 text-gray-400" /> :
-                                          <FileText className="h-5 w-5 text-gray-400" />
+                                      <FileText className="h-5 w-5 text-gray-400" />
                                     )}
                                   </div>
-                                  <p className="text-sm font-medium text-gray-300 truncate">{item.title}</p>
+                                  <p className="text-sm font-medium text-gray-300 truncate">
+                                    {item.title}
+                                  </p>
                                 </div>
                                 <div className="flex gap-2">
                                   <Button
                                     variant="outline"
                                     size="icon"
                                     className="h-7 w-7 border-gray-600 hover:bg-gray-700"
-                                    onClick={() => handleEditContentClick(item._id)}
+                                    onClick={() =>
+                                      handleEditContentClick(item._id)
+                                    }
                                   >
                                     <Edit className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="destructive" size="icon" onClick={() => openDeleteContentConfirm(item._id)} className="h-7 w-7 bg-red-900/40 text-red-400 hover:bg-red-900/80">
+                                  <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() =>
+                                      openDeleteContentConfirm(item._id)
+                                    }
+                                    className="h-7 w-7 bg-red-900/40 text-red-400 hover:bg-red-900/80"
+                                  >
                                     <Trash className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
                             ))
                           ) : (
-                            <p className="text-xs text-gray-500 text-center py-2">No content has been added to this module yet.</p>
+                            <p className="text-xs text-gray-500 text-center py-2">
+                              No content has been added to this module yet.
+                            </p>
                           )}
                         </div>
 
                         {/* Add Content Buttons */}
                         <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-700/50">
-                          <Button size="sm" variant="outline" onClick={() => handleOpenUploadModal(module._id, 'VIDEO')} className="border-gray-600 hover:bg-gray-700 text-xs"><Video className="h-3 w-3 mr-1.5" /> Add Video</Button>
-                          <Button size="sm" variant="outline" onClick={() => handleOpenUploadModal(module._id, 'PPT')} className="border-gray-600 hover:bg-gray-700 text-xs"><Presentation className="h-3 w-3 mr-1.5" /> Add PPT</Button>
-                          <Button size="sm" variant="outline" onClick={() => handleOpenUploadModal(module._id, 'NOTES')} className="border-gray-600 hover:bg-gray-700 text-xs"><FileText className="h-3 w-3 mr-1.5" /> Add Notes</Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              handleOpenUploadModal(module._id, "VIDEO")
+                            }
+                            className="border-gray-600 hover:bg-gray-700 text-xs"
+                          >
+                            <Video className="h-3 w-3 mr-1.5" /> Add Video
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              handleOpenUploadModal(module._id, "PPT")
+                            }
+                            className="border-gray-600 hover:bg-gray-700 text-xs"
+                          >
+                            <Presentation className="h-3 w-3 mr-1.5" /> Add PPT
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              handleOpenUploadModal(module._id, "NOTES")
+                            }
+                            className="border-gray-600 hover:bg-gray-700 text-xs"
+                          >
+                            <FileText className="h-3 w-3 mr-1.5" /> Add Notes
+                          </Button>
                         </div>
                       </div>
                     ))}
                     {currentCourse.modules?.length === 0 && (
-                      <p className="text-sm text-gray-500 text-center py-4">No modules created yet. Add one below to start.</p>
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        No modules created yet. Add one below to start.
+                      </p>
                     )}
                   </div>
 
                   {/* Add New Module */}
                   <div className="mt-6 pt-6 border-t border-gray-700">
-                    <label className="mb-2 block text-sm font-semibold text-gray-300">Add a New Module</label>
+                    <label className="mb-2 block text-sm font-semibold text-gray-300">
+                      Add a New Module
+                    </label>
                     <div className="flex items-center gap-2">
                       <Input
                         value={newModuleTitle}
@@ -1122,7 +1404,10 @@ const ManageCoursesPage = () => {
                         placeholder="e.g., Module 1: Introduction to Data Science"
                         className="bg-gray-800 border-gray-700"
                       />
-                      <Button onClick={handleAddModule} disabled={!newModuleTitle || isSubmitting}>
+                      <Button
+                        onClick={handleAddModule}
+                        disabled={!newModuleTitle || isSubmitting}
+                      >
                         <Plus className="h-4 w-4 mr-2" /> Add Module
                       </Button>
                     </div>
@@ -1131,26 +1416,29 @@ const ManageCoursesPage = () => {
               ) : (
                 // --- This message shows for brand new courses ---
                 <div className="text-center text-gray-500 text-sm py-4 bg-gray-900 rounded-lg">
-                  <p>Please save the course details first to enable adding modules and content.</p>
+                  <p>
+                    Please save the course details first to enable adding
+                    modules and content.
+                  </p>
                 </div>
               )}
             </div>
-
           </ModalBody>
 
           {/* ---------------- Modal Footer ------------------ */}
           <ModalFooter className="p-4 sm:p-6">
             <div className="flex flex-col-reverse sm:flex-row gap-3 w-full sm:w-auto sm:justify-end">
+              {/* Close / Cancel */}
               <Button
                 variant="outline"
                 onClick={() => setShowModal(false)}
                 disabled={isSubmitting}
                 className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-gray-100 text-sm sm:text-base px-4 py-2"
               >
-                {/* --- NEW --- The button text changes to "Close" after the first save */}
                 {currentCourse?._id ? "Close" : "Cancel"}
               </Button>
-              {/* --- NEW --- The main submit button is only shown if the course has NOT been created yet */}
+
+              {/* ------------- CREATE MODE (no _id) ------------- */}
               {!currentCourse?._id && (
                 <Button
                   onClick={handleSubmit}
@@ -1166,6 +1454,27 @@ const ManageCoursesPage = () => {
                     <>
                       <Save className="h-4 w-4" />
                       Save and Continue
+                    </>
+                  )}
+                </Button>
+              )}
+
+              {/* ------------- UPDATE MODE (has _id) ------------- */}
+              {currentCourse?._id && (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-600 text-white text-sm sm:text-base px-4 py-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Update Course
                     </>
                   )}
                 </Button>

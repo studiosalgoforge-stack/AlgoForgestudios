@@ -1,4 +1,4 @@
-import { dbConnect } from '../lib/db';
+import connectDB from '@/lib/db';
 import Course from '../models/Course';
 import { getCourses } from '../lib/courseData';
 import {
@@ -50,7 +50,7 @@ async function seedCourses() {
     console.log('🌱 Starting course seeding...');
     
     // Connect to database
-    await dbConnect();
+    await connectDB();
     console.log('✅ Connected to database');
     
     // Clear existing courses
