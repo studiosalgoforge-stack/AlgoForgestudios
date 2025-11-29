@@ -33,6 +33,7 @@ import {
   Sparkles,
   ChevronRight,
   Info,
+  PlayCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -47,9 +48,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface SyllabusItem {
-  module: string;
-  topics: string[];
+// --- UPDATED INTERFACES ---
+interface Lecture {
+  title: string;
+  duration: string;
+  isPreview?: boolean;
+}
+
+interface SyllabusSection {
+  title: string;
+  lectures: Lecture[];
 }
 
 interface Course {
@@ -75,9 +83,8 @@ interface Course {
   certificate?: boolean;
   language?: string;
   prerequisites?: string;
-  curriculum?: any[];
-  syllabus?: SyllabusItem[];
-  iconName?: string;
+  // Updated syllabus type
+  syllabus?: SyllabusSection[];
   featured?: boolean;
   trending?: boolean;
 }
@@ -311,6 +318,9 @@ export default function CourseDetailPage({
   const [isEnrollmentModalOpen, setIsEnrollmentModalOpen] = useState(false);
 const [isWishlisted, setIsWishlisted] = useState(false);
 
+// --- ACCORDION STATE ---
+  // Store indices of expanded sections. 
+  const [expandedSections, setExpandedSections] = useState<number[]>([]);
 
 
 // Compact text truncation
@@ -384,6 +394,10 @@ const SYLLABUS_PDF_URL = '/assets/documents/course-syllabus.pdf';
       try {
         const response = await axios.get(`/api/courses/${resolvedParams.id}`);
         setCourse(response.data.course);
+        // Initially expand the first section
+        if(response.data.course?.syllabus?.length > 0) {
+            setExpandedSections([0]);
+        }
       } catch (error) {
         console.error("Error fetching course details, falling back", error);
         try {
@@ -417,6 +431,47 @@ const SYLLABUS_PDF_URL = '/assets/documents/course-syllabus.pdf';
       default:
         return <BookOpen className="w-4 h-4" />;
     }
+  };
+
+  // --- ACCORDION HANDLERS ---
+  const toggleSection = (index: number) => {
+    setExpandedSections(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index) 
+        : [...prev, index]
+    );
+  };
+
+  const expandAll = () => {
+    if (course?.syllabus) {
+      setExpandedSections(course.syllabus.map((_, i) => i));
+    }
+  };
+
+  const collapseAll = () => {
+    setExpandedSections([]);
+  };
+
+  const isAllExpanded = course?.syllabus && course.syllabus.length > 0 && expandedSections.length === course.syllabus.length;
+
+  // Calculates totals from the nested structure
+  const totalLecturesCount = course?.syllabus?.reduce((acc, sec) => acc + (sec.lectures?.length || 0), 0) || 0;
+  
+  // Helper to parse "MM:SS" and sum it up (simplified)
+  const calculateTotalDuration = () => {
+    if (!course?.syllabus) return "0h 0m";
+    let totalMinutes = 0;
+    course.syllabus.forEach(sec => {
+        sec.lectures?.forEach(lec => {
+            const parts = lec.duration.split(':');
+            if(parts.length === 2) {
+                totalMinutes += parseInt(parts[0]) + parseInt(parts[1]) / 60;
+            }
+        });
+    });
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = Math.round(totalMinutes % 60);
+    return `${hours}h ${mins}m`;
   };
 
   if (loading) {
@@ -950,150 +1005,111 @@ const SYLLABUS_PDF_URL = '/assets/documents/course-syllabus.pdf';
           transition={{ duration: 0.5, delay: 0.4 }}
           className="max-w-4xl mx-auto space-y-6"
         >
-          <div className="text-center space-y-3">
-            <h2 className="text-2xl font-bold text-white">
-              Course{" "}
-              <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                Curriculum
-              </span>
-            </h2>
-            <p className="text-gray-300 text-sm max-w-xl mx-auto">
-              Comprehensive learning path designed by industry experts
-            </p>
+          <div className="space-y-3">
+            <h2 className="text-2xl font-bold text-white">Course Content</h2>
+            
+            {/* Stats Header */}
+            <div className="flex flex-wrap items-center justify-between text-sm text-gray-400 pb-2">
+                <div className="flex gap-2">
+                   <span>{course.syllabus?.length || 0} sections</span> • 
+                   <span>{totalLecturesCount} lectures</span> • 
+                   <span>{calculateTotalDuration()} total length</span>
+                </div>
+                <button 
+                  onClick={isAllExpanded ? collapseAll : expandAll}
+                  className="text-cyan-400 font-medium hover:text-cyan-300 transition-colors"
+                >
+                    {isAllExpanded ? 'Collapse all sections' : 'Expand all sections'}
+                </button>
+            </div>
           </div>
 
+          <div className="border border-gray-700/50 rounded-lg overflow-hidden bg-gray-900/50">
           {course.syllabus && course.syllabus.length > 0 ? (
-            <div className="space-y-3">
-              {course.syllabus.map((module, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: idx * 0.05 }}
-                >
-                  <Card className="bg-gradient-to-br from-gray-900/90 to-black/90 backdrop-blur-xl border border-gray-700/50 hover:border-cyan-500/30 transition-all duration-300 overflow-hidden">
-                    <button
-                      onClick={() =>
-                        setOpenModule(openModule === idx ? null : idx)
-                      }
-                      className="w-full p-4 flex justify-between items-center text-left hover:bg-gray-800/20 transition-all duration-300 group"
-                    >
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 text-cyan-300 rounded-lg font-bold text-sm group-hover:scale-105 transition-transform">
-                          {idx + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base font-bold text-white mb-1 pr-4 group-hover:text-cyan-300 transition-colors">
-                            {module.module}
-                          </h3>
-                          <div className="flex items-center gap-3 text-xs text-gray-400">
-                            <span className="flex items-center gap-1">
-                              <BookOpen className="w-3 h-3" />
-                              {module.topics?.length || 0} topics
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Info className="w-3 h-3" />
-                              {openModule === idx
-                                ? "Click to collapse"
-                                : "Click to expand"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex-shrink-0 ml-4">
-                        <motion.div
-                          animate={{ rotate: openModule === idx ? 180 : 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <ChevronDown className="w-4 h-4 text-cyan-400" />
-                        </motion.div>
-                      </div>
-                    </button>
+            course.syllabus.map((section, idx) => {
+              const isExpanded = expandedSections.includes(idx);
+              const lectureCount = section.lectures?.length || 0;
+              
+              // Calculate section duration
+              let sectionMins = 0;
+              section.lectures?.forEach(l => {
+                 const [m, s] = l.duration.split(':').map(Number);
+                 if(!isNaN(m)) sectionMins += m + (s||0)/60;
+              });
+              const secDuration = `${Math.round(sectionMins)}min`;
 
-                    <AnimatePresence>
-                      {openModule === idx && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="border-t border-gray-700/50"
-                        >
-                          <div className="p-4 bg-black/20">
-                            <div className="bg-gradient-to-r from-gray-900/50 to-black/50 rounded-lg p-3 border border-gray-700/30">
-                              <h4 className="text-xs font-semibold text-cyan-300 mb-3 flex items-center gap-2">
-                                <CheckCircle className="w-3 h-3" />
-                                Learning Objectives:
-                              </h4>
-                              {module.topics && module.topics.length > 0 ? (
-                                <div className="grid sm:grid-cols-2 gap-2">
-                                  {module.topics.map((topic, i) => (
-                                    <motion.div
-                                      key={i}
-                                      initial={{ opacity: 0, x: -20 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{
-                                        duration: 0.3,
-                                        delay: i * 0.03,
-                                      }}
-                                      className="flex items-start gap-2 text-gray-300 p-2 rounded hover:bg-gray-800/30 transition-colors group"
-                                    >
-                                      <ChevronRight className="w-3 h-3 text-cyan-400 mt-0.5 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
-                                      <span className="leading-relaxed text-xs">
-                                        {topic}
-                                      </span>
-                                    </motion.div>
-                                  ))}
+              return (
+                <div key={idx} className="border-b border-gray-700/50 last:border-0">
+                  {/* Section Header */}
+                  <button
+                    onClick={() => toggleSection(idx)}
+                    className="w-full p-4 flex items-center justify-between bg-gray-800/40 hover:bg-gray-800/80 transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-4">
+                        {isExpanded ? (
+                             <ChevronUp className="w-4 h-4 text-gray-400" />
+                        ) : (
+                             <ChevronDown className="w-4 h-4 text-gray-400" />
+                        )}
+                        <h3 className="font-bold text-white text-base">
+                            {section.title}
+                        </h3>
+                    </div>
+                    <div className="text-xs text-gray-400 hidden sm:block">
+                        {lectureCount} lectures • {secDuration}
+                    </div>
+                  </button>
+
+                  {/* Accordion Body */}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden bg-black/20"
+                      >
+                         <div className="p-2 space-y-1">
+                            {section.lectures?.map((lecture, lIdx) => (
+                                <div 
+                                  key={lIdx} 
+                                  className="flex items-center justify-between p-3 hover:bg-white/5 rounded-md group transition-colors cursor-pointer"
+                                >
+                                   <div className="flex items-center gap-3">
+                                       {lecture.isPreview ? (
+                                           <PlayCircle className="w-4 h-4 text-cyan-400" />
+                                       ) : (
+                                           <PlayCircle className="w-4 h-4 text-gray-500" />
+                                       )}
+                                       <span className={`text-sm ${lecture.isPreview ? 'text-cyan-100' : 'text-gray-300'}`}>
+                                          {lecture.title}
+                                       </span>
+                                   </div>
+                                   
+                                   <div className="flex items-center gap-4">
+                                       {lecture.isPreview && (
+                                           <span className="text-xs text-cyan-400 underline decoration-cyan-400/30 underline-offset-4 hidden sm:inline">Preview</span>
+                                       )}
+                                       <span className="text-xs text-gray-500">
+                                           {lecture.duration}
+                                       </span>
+                                   </div>
                                 </div>
-                              ) : (
-                                <div className="text-center py-6">
-                                  <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
-                                    <BookOpen className="w-6 h-6 text-cyan-400" />
-                                  </div>
-                                  <p className="text-gray-400 text-xs italic">
-                                    Detailed topics will be updated soon. Stay
-                                    tuned!
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+                            ))}
+                         </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })
           ) : (
-            <Card className="bg-gradient-to-br from-gray-900/90 to-black/90 border border-gray-700/50">
-              <CardContent className="text-center py-12">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.5, type: "spring" }}
-                  className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-xl flex items-center justify-center"
-                >
-                  <BookOpen className="w-8 h-8 text-cyan-400" />
-                </motion.div>
-                <h3 className="text-lg font-bold text-white mb-3">
-                  Curriculum Under Development
-                </h3>
-                <p className="text-gray-400 mb-4 text-xs max-w-xs mx-auto">
-                  Our expert curriculum team is crafting a comprehensive
-                  learning experience. The detailed syllabus will be available
-                  soon!
-                </p>
-                <Button
-                  variant="outline"
-                  className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 text-xs h-8"
-                >
-                  <Bell className="w-3 h-3 mr-1" />
-                  Get Notified
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="p-8 text-center text-gray-400 text-sm">
+                No syllabus content available yet.
+            </div>
           )}
+          </div>
         </motion.section>
 
         {/* Compact Tags */}

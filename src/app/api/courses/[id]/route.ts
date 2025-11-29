@@ -3,33 +3,42 @@ import { NextRequest, NextResponse } from 'next/server';
 import { CourseService } from '@/lib/courseService';
 import mongoose from 'mongoose';
 import "@/models/Content";
-import "@/models/Module"
-import "@/models/Course"
+import "@/models/Module";
+import "@/models/Course";
 
-// Validation helper
+// --- UPDATED VALIDATION FOR NEW SYLLABUS STRUCTURE ---
 const validateUpdateData = (data: any) => {
   if (data.syllabus !== undefined) {
     if (!Array.isArray(data.syllabus)) {
       throw new Error('Syllabus must be an array');
     }
 
-    data.syllabus = data.syllabus.map((item: any, i: number) => {
-      if (!item || typeof item !== 'object') {
+    data.syllabus = data.syllabus.map((section: any, i: number) => {
+      if (!section || typeof section !== 'object') {
         throw new Error(`Syllabus item at index ${i} must be an object`);
       }
-      if (!item.module || typeof item.module !== 'string') {
-        throw new Error(`Syllabus module at index ${i} is required`);
-      }
-      if (!item.topics) item.topics = [];
-      else if (!Array.isArray(item.topics)) {
-        throw new Error(`Topics at index ${i} must be an array`);
+
+      // Check for the new 'title' field
+      if (!section.title || typeof section.title !== 'string') {
+        throw new Error(`Syllabus section title at index ${i} is required`);
       }
 
-      item.topics = item.topics.filter((t: any) => t && typeof t === 'string');
+      // Ensure lectures array exists
+      if (!section.lectures) section.lectures = [];
+      else if (!Array.isArray(section.lectures)) {
+        throw new Error(`Lectures at index ${i} must be an array`);
+      }
+
+      // Sanitize lectures
+      const sanitizedLectures = section.lectures.map((lec: any) => ({
+        title: lec.title || "Untitled Lecture",
+        duration: lec.duration || "00:00",
+        isPreview: !!lec.isPreview
+      }));
 
       return {
-        module: item.module.trim(),
-        topics: item.topics
+        title: section.title.trim(),
+        lectures: sanitizedLectures
       };
     });
   }
@@ -46,7 +55,7 @@ const validateUpdateData = (data: any) => {
 -------------------------------------- */
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await ctx.params; // ✅ FIX
+    const { id } = await ctx.params; 
 
     const { searchParams } = new URL(req.url);
     const populate = searchParams.get('populate');
@@ -73,7 +82,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 -------------------------------------- */
 export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await ctx.params; // ✅ FIX
+    const { id } = await ctx.params; 
 
     const updateData = await req.json();
     const validated = validateUpdateData(updateData);
@@ -111,7 +120,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
 -------------------------------------- */
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await ctx.params; // ✅ FIX
+    const { id } = await ctx.params; 
 
     const updateData = await req.json();
     const validated = validateUpdateData(updateData);
@@ -149,7 +158,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 -------------------------------------- */
 export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await ctx.params; // ✅ FIX
+    const { id } = await ctx.params; 
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid course ID' }, { status: 400 });
