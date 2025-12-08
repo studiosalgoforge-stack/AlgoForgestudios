@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 
-@import 'highlight.js/styles/github-dark.css';
+
 
 @custom-variant dark (&:is(.dark *));
 
@@ -338,4 +338,5 @@
   50% { background-position: 100% 50%; }
 
 }
+
 
