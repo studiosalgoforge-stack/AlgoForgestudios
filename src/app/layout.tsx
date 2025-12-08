@@ -6,7 +6,7 @@ import { MaintenancePage } from "@/components/maintenance-page";
 import AppLayout from "@/components/AppLayout";
 import Script from "next/script";
 import type { Metadata } from "next";
-
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "AlgoForge Studios – AI & ML Education | Enterprise AI Solutions",
   description:
@@ -117,3 +117,4 @@ export default async function RootLayout({
   );
 
 }
+
