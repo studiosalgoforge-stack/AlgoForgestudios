@@ -1,3 +1,12 @@
+export default function LearningResourcesPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <h1 className="text-2xl">Learning Resources Coming Soon</h1>
+    </div>
+  );
+}
+
+
 // "use client";
 
 // import { MindMapViewer } from "@/components/MindMapViewer";
@@ -261,4 +270,5 @@
 //     </div>
 //   );
 // }
+
 
