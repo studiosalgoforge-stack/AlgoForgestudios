@@ -1,28 +1,51 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+// src/lib/maintenance.ts
 
-const MAINTENANCE_FILE = path.join(process.cwd(), 'maintenance.flag');
+import SystemSetting from '@/models/SystemSetting';
+import connectDB from './db';
 
 export async function isMaintenanceMode(): Promise<boolean> {
   try {
-    await fs.access(MAINTENANCE_FILE);
-    return true;
-  } catch {
-    return false;
+    await connectDB();
+    const setting = await SystemSetting.findOne({ key: 'maintenance_mode' });
+    return setting ? setting.value : false;
+  } catch (error) {
+    console.error('Error checking maintenance mode:', error);
+    return false; // Fail safe: if DB fails, keep site open
   }
 }
 
 export async function getMaintenanceInfo() {
   try {
-    const content = await fs.readFile(MAINTENANCE_FILE, 'utf-8');
+    await connectDB();
+    const setting = await SystemSetting.findOne({ key: 'maintenance_mode' });
+    
     return {
-      enabled: true,
-      enabledAt: content.trim()
+      enabled: setting ? setting.value : false,
+      enabledAt: setting ? setting.updatedAt : null
     };
-  } catch {
+  } catch (error) {
     return {
       enabled: false,
       enabledAt: null
     };
+  }
+}
+
+export async function setMaintenanceMode(enabled: boolean) {
+  try {
+    await connectDB();
+    await SystemSetting.findOneAndUpdate(
+      { key: 'maintenance_mode' },
+      { 
+        key: 'maintenance_mode',
+        value: enabled,
+        updatedAt: new Date()
+      },
+      { upsert: true, new: true }
+    );
+    return true;
+  } catch (error) {
+    console.error('Error setting maintenance mode:', error);
+    throw new Error('Failed to update maintenance mode in database');
   }
 }

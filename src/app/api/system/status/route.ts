@@ -1,27 +1,28 @@
+// src/app/api/system/status/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { isMaintenanceMode, setMaintenanceMode } from '@/lib/maintenance';
 
-const MAINTENANCE_FILE = path.join(process.cwd(), 'maintenance.flag');
-const CONTROL_KEY = process.env.KEY;
-
+// Ensure you have this environment variable set in Vercel/Production!
+const CONTROL_KEY = process.env.KEY; 
 
 export async function GET() {
   try {
-    await fs.access(MAINTENANCE_FILE);
-    return NextResponse.json({ maintenance: true });
-  } catch {
+    // Check DB instead of file system
+    const maintenance = await isMaintenanceMode();
+    return NextResponse.json({ maintenance });
+  } catch (error) {
+    console.error('Maintenance API GET error:', error);
+    // Default to false if DB check fails to avoid locking everyone out
     return NextResponse.json({ maintenance: false });
   }
 }
-
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { action, key } = body;
 
-    
+    // Security Check
     if (!key || key !== CONTROL_KEY) {
       return NextResponse.json(
         { error: 'Unauthorized' }, 
@@ -30,33 +31,36 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'enable') {
-      await fs.writeFile(MAINTENANCE_FILE, new Date().toISOString());
+      // Write TRUE to Database
+      await setMaintenanceMode(true);
+      
       return NextResponse.json({ 
         success: true, 
         message: 'Maintenance mode enabled',
         maintenance: true 
       });
+
     } else if (action === 'disable') {
-      try {
-        await fs.unlink(MAINTENANCE_FILE);
-      } catch {
-        
-      }
+      // Write FALSE to Database
+      await setMaintenanceMode(false);
+
       return NextResponse.json({ 
         success: true, 
         message: 'Maintenance mode disabled',
         maintenance: false 
       });
+
     } else {
       return NextResponse.json(
         { error: 'Invalid action. Use "enable" or "disable"' }, 
         { status: 400 }
       );
     }
+
   } catch (error) {
-    console.error('Maintenance API error:', error);
+    console.error('Maintenance API POST error:', error);
     return NextResponse.json(
-      { error: 'Server error' }, 
+      { error: 'Server error updating maintenance mode' }, 
       { status: 500 }
     );
   }

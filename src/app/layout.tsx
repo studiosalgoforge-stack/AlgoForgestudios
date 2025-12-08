@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 import "./globals.css";
 import { isMaintenanceMode } from "@/lib/maintenance";
-import { headers } from "next/headers";
+// We don't need 'headers' for the maintenance check anymore
 import { MaintenancePage } from "@/components/maintenance-page";
 import AppLayout from "@/components/AppLayout";
 import Script from "next/script";
@@ -57,11 +57,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const headersList = await headers();
-  const maintenanceMode =
-    headersList.get("x-maintenance-mode") === "true" ||
-    (await isMaintenanceMode());
+  // Check the Database for maintenance mode
+  const maintenanceMode = await isMaintenanceMode();
 
+  // If Maintenance is ON, show the Maintenance Page immediately
   if (maintenanceMode) {
     return (
       <html lang="en" className="dark">
@@ -72,13 +71,13 @@ export default async function RootLayout({
     );
   }
 
+  // Otherwise, render the app normally
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         {/* JSON-LD Schema */}
         <script
           type="application/ld+json"
-          // next/head replacement
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -98,24 +97,22 @@ export default async function RootLayout({
       <body className="dark bg-gradient-to-br from-black via-gray-900 to-black text-white min-h-screen">
         {/* Google Analytics */}
         <Script
-  async
-  src="https://www.googletagmanager.com/gtag/js?id=G-CFQYK79X85"
-  strategy="afterInteractive"
-/>
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-CFQYK79X85"
+          strategy="afterInteractive"
+        />
 
-<Script id="google-analytics" strategy="afterInteractive">
-  {`
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-CFQYK79X85');
-  `}
-</Script>
-
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-CFQYK79X85');
+          `}
+        </Script>
 
         <AppLayout>{children}</AppLayout>
       </body>
     </html>
   );
 }
-
