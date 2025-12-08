@@ -1,4 +1,5 @@
 // src/app/layout.tsx
+import "tw-animate-css";
 import "./globals.css";
 import { isMaintenanceMode } from "@/lib/maintenance";
 // We don't need 'headers' for the maintenance check anymore
