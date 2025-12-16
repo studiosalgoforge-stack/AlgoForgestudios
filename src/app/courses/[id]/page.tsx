@@ -385,7 +385,7 @@ const [isWishlisted, setIsWishlisted] = useState(false);
   document.body.removeChild(link);
 };
 
-const SYLLABUS_PDF_URL = '/assets/documents/course-syllabus.pdf';
+const SYLLABUS_PDF_URL = '/assets/documents/Algoforge Studios Courses overview brochure.pdf';
 
   const handleDownload = () => {
   const link = document.createElement('a');
