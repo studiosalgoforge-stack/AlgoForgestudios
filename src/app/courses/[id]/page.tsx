@@ -47,6 +47,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { BROCHURE_MAP } from "@/lib/brochures";
 
 // --- UPDATED INTERFACES ---
 interface Lecture {
@@ -256,6 +257,9 @@ const EnrollmentModal = ({
                       </>
                     )}
                   </Button>
+
+
+
                 </div>
               </form>
             </>
@@ -358,6 +362,29 @@ const [isWishlisted, setIsWishlisted] = useState(false);
       alert('Course link copied to clipboard!');
     }
   };
+
+
+  const handleBrochureDownload = () => {
+  if (!course?.courseCategory) {
+    alert("Brochure not available");
+    return;
+  }
+
+  const brochureUrl = BROCHURE_MAP[course.courseCategory];
+
+  if (!brochureUrl) {
+    alert("Brochure not available for this course");
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.href = brochureUrl;
+  link.download = `${course.title.replace(/\s+/g, "_")}_Brochure.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 const SYLLABUS_PDF_URL = '/assets/documents/course-syllabus.pdf';
 
   const handleDownload = () => {
@@ -880,6 +907,17 @@ const SYLLABUS_PDF_URL = '/assets/documents/course-syllabus.pdf';
                         Enroll Now
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
+
+                      {BROCHURE_MAP[course.courseCategory ?? ""] && (
+  <Button
+    onClick={handleBrochureDownload}
+    variant="outline"
+    className="mt-3 w-full"
+  >
+    Download Brochure
+  </Button>
+)}
+
                     </motion.div>
 
                     {/* Compact Highlights */}
