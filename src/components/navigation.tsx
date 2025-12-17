@@ -1134,13 +1134,13 @@ export function Navigation() {
               >
                 Careers
               </Link>
-              <Link
+              {/* <Link
                 href="/learning-resources"
                 onClick={() => setIsMenuOpen(false)}
                 className="text-gray-300 hover:text-cyan-300 block px-4 py-3 text-base font-medium rounded-lg hover:bg-cyan-500/10 transition-all duration-300"
               >
                 Learning Resources
-              </Link>
+              </Link> */}
               <Link
                 href="/blog"
                 onClick={() => setIsMenuOpen(false)}
@@ -1296,4 +1296,5 @@ export function Navigation() {
     </nav>
   );
 }
+
 
