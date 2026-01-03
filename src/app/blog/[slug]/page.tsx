@@ -11,12 +11,14 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface BlogProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>; // UPDATED: params is now a Promise
 }
 
 export default async function BlogPostPage({ params }: BlogProps) {
-  // CORRECTED: Await the database call and use params directly.
-  const post = await getBlogPost(params.slug);
+  // UPDATED: Must await params before accessing properties
+  const { slug } = await params;
+  
+  const post = await getBlogPost(slug);
 
   if (!post) {
     notFound();
