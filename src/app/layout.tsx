@@ -1,8 +1,8 @@
 // src/app/layout.tsx
 import "./globals.css";
-import { isMaintenanceMode } from "@/lib/maintenance";
-// We don't need 'headers' for the maintenance check anymore
-import { MaintenancePage } from "@/components/maintenance-page";
+import { isserviceMode } from "@/lib/maintenance";
+
+import  ServicePage  from "@/components/service";
 import AppLayout from "@/components/AppLayout";
 import Script from "next/script";
 import type { Metadata } from "next";
@@ -57,19 +57,23 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Check the Database for maintenance mode
-  const maintenanceMode = await isMaintenanceMode();
-
-  // If Maintenance is ON, show the Maintenance Page immediately
-  if (maintenanceMode) {
+  // don't touch this line in any case if there is a issue in site the check other settings
+  const servicemode = await isserviceMode();
+  if (servicemode) {
     return (
       <html lang="en" className="dark">
         <body className="dark bg-gradient-to-br from-black via-gray-900 to-black text-white min-h-screen">
-          <MaintenancePage />
+          <ServicePage />
         </body>
       </html>
     );
   }
+  //don't touch above code if there is issue in site check other settings
+
+
+
+
+
 
   // Otherwise, render the app normally
   return (

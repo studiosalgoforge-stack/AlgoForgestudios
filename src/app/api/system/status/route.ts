@@ -1,13 +1,13 @@
 // src/app/api/system/status/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { isMaintenanceMode, setMaintenanceMode } from '@/lib/maintenance';
+import { isserviceMode, setserviceMode } from '@/lib/maintenance';
 import { revalidatePath } from 'next/cache'; // <--- IMPORT THIS
 
 const CONTROL_KEY = process.env.KEY; 
 
 export async function GET() {
   try {
-    const maintenance = await isMaintenanceMode();
+    const maintenance = await isserviceMode();
     // Prevent caching of the status check itself
     return NextResponse.json({ maintenance }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'enable') {
-      await setMaintenanceMode(true);
+      await setserviceMode(true);
       
       // FORCE REFRESH: Tell Next.js to rebuild the layout immediately
       revalidatePath('/', 'layout'); 
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, maintenance: true });
 
     } else if (action === 'disable') {
-      await setMaintenanceMode(false);
+      await setserviceMode(false);
       
       // FORCE REFRESH
       revalidatePath('/', 'layout'); 

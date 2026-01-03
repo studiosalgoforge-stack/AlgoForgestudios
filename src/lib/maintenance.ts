@@ -3,21 +3,21 @@
 import SystemSetting from '@/models/SystemSetting';
 import connectDB from './db';
 
-export async function isMaintenanceMode(): Promise<boolean> {
+export async function isserviceMode(): Promise<boolean> {
   try {
     await connectDB();
-    const setting = await SystemSetting.findOne({ key: 'maintenance_mode' });
+    const setting = await SystemSetting.findOne({ key: 'service' });
     return setting ? setting.value : false;
   } catch (error) {
-    console.error('Error checking maintenance mode:', error);
+    console.error('Error checking service mode:', error);
     return false; // Fail safe: if DB fails, keep site open
   }
 }
 
-export async function getMaintenanceInfo() {
+export async function getserviceInfo() {
   try {
     await connectDB();
-    const setting = await SystemSetting.findOne({ key: 'maintenance_mode' });
+    const setting = await SystemSetting.findOne({ key: 'service' });
     
     return {
       enabled: setting ? setting.value : false,
@@ -31,13 +31,13 @@ export async function getMaintenanceInfo() {
   }
 }
 
-export async function setMaintenanceMode(enabled: boolean) {
+export async function setserviceMode(enabled: boolean) {
   try {
     await connectDB();
     await SystemSetting.findOneAndUpdate(
-      { key: 'maintenance_mode' },
+      { key: 'service' },
       { 
-        key: 'maintenance_mode',
+        key: 'service',
         value: enabled,
         updatedAt: new Date()
       },
@@ -45,7 +45,7 @@ export async function setMaintenanceMode(enabled: boolean) {
     );
     return true;
   } catch (error) {
-    console.error('Error setting maintenance mode:', error);
-    throw new Error('Failed to update maintenance mode in database');
+    console.error('Error setting service mode:', error);
+    throw new Error('Failed to update service mode in database');
   }
 }
