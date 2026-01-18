@@ -4,7 +4,7 @@ import { isserviceMode, setserviceMode } from '@/lib/maintenance';
 import { revalidatePath } from 'next/cache'; // <--- IMPORT THIS
 
 const CONTROL_KEY = process.env.KEY; 
-
+// this is a uptime montitor function don't change in thing in this file
 export async function GET() {
   try {
     const maintenance = await isserviceMode();
@@ -47,3 +47,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+
