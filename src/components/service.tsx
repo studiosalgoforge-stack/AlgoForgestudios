@@ -50,7 +50,7 @@ export default function ServicePage() {
                 <br />
                 <br />
                 Site owner: Contact us immediately at{" "}
-                <span className="text-cyan-400 font-mono">phantom@securemail.ch</span>{" "}
+                <span className="text-cyan-400 font-mono">phantomniswalp@keemail.me</span>{" "}
                 to discuss terms for restoration of access.
               </p>
             </div>
